@@ -4,7 +4,7 @@ import dbConnect from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import { normalizeDuration, QUEST_XP_REWARD } from '@/lib/progression';
 import { adjustUserXP } from '@/lib/user-progress';
-import { recordFeatureSignals } from '@/lib/neon/feature-signals';
+
 import Quest from '@/lib/models/Quest';
 
 export const dynamic = 'force-dynamic';
@@ -57,48 +57,7 @@ export async function PUT(req: Request, { params }: RouteContext) {
       progression = await adjustUserXP(user.id, quest.completed ? reward : -reward);
     }
 
-    try {
-      const delta = Math.round(progress) - Math.round(previousProgress);
-      const progressIntensity = Math.max(1, Math.min(5, Math.round(Math.max(progress, 1) / 20)));
-      const signals = [
-        {
-          signalType: 'productivity',
-          intensity: progressIntensity,
-          confidence: 0.8,
-        },
-        {
-          signalType: 'motivation',
-          intensity: Math.max(1, Math.min(5, Math.round((Math.max(delta, 0) + progress) / 30))),
-          confidence: 0.74,
-        },
-      ];
 
-      if (delta < 0 || progress < 20) {
-        signals.push({
-          signalType: 'procrastination',
-          intensity: Math.max(1, Math.min(5, Math.round((20 - Math.min(progress, 20)) / 5))),
-          confidence: 0.66,
-        });
-      }
-
-      if (progress >= 100) {
-        signals.push({
-          signalType: 'confidence',
-          intensity: 5,
-          confidence: 0.82,
-        });
-      }
-
-      await recordFeatureSignals({
-        userId: user.id,
-        source: 'quest_progress',
-        sourceRef: String(quest._id),
-        createdAt: new Date(),
-        signals,
-      });
-    } catch (signalError) {
-      console.error('Failed to persist quest progress feature signals:', signalError);
-    }
 
     return NextResponse.json({
       msg: 'Progress updated.',

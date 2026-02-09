@@ -3,7 +3,7 @@ import dbConnect from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import { getDayKey } from '@/lib/progression';
 import { adjustUserXP } from '@/lib/user-progress';
-import { recordFeatureSignals } from '@/lib/neon/feature-signals';
+
 import CheckIn from '@/lib/models/CheckIn';
 
 export const dynamic = 'force-dynamic';
@@ -58,37 +58,7 @@ export async function POST(req: Request) {
 
     await checkIn.save();
 
-    try {
-      const focusIntensity = clamp(Math.round(ratings[1]), 1, 5);
-      const stressIntensity = clamp(Math.round(6 - ratings[2]), 1, 5);
-      const fatigueIntensity = clamp(Math.round(6 - ratings[0]), 1, 5);
-      const motivationIntensity = clamp(Math.round((percentage / 100) * 5), 1, 5);
 
-      const signals = [
-        { signalType: 'focus', intensity: focusIntensity, confidence: 0.84 },
-        { signalType: 'stress', intensity: stressIntensity, confidence: 0.82 },
-        { signalType: 'fatigue', intensity: fatigueIntensity, confidence: 0.78 },
-        { signalType: 'motivation', intensity: motivationIntensity, confidence: 0.76 },
-      ];
-
-      if (percentage >= 70) {
-        signals.push({
-          signalType: 'confidence',
-          intensity: clamp(Math.round((percentage / 100) * 5), 1, 5),
-          confidence: 0.72,
-        });
-      }
-
-      await recordFeatureSignals({
-        userId: user.id,
-        source: 'daily_pulse',
-        sourceRef: String(checkIn._id),
-        createdAt: new Date(checkIn.date),
-        signals,
-      });
-    } catch (signalError) {
-      console.error('Failed to persist daily pulse feature signals:', signalError);
-    }
 
     const progression = await adjustUserXP(user.id, percentage);
 

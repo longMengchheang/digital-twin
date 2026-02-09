@@ -2,11 +2,14 @@ import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 import { unauthorized } from './api-response';
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET is not defined');
+// Lazy load secret to avoid build-time errors
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined'); 
+  }
+  return secret;
 }
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 export interface DecodedUser {
   id: string;
@@ -19,7 +22,7 @@ interface AuthPayload {
 }
 
 export function signToken(user: DecodedUser): string {
-  return jwt.sign({ user }, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ user }, getJwtSecret(), { expiresIn: '7d' });
 }
 
 export function verifyToken(req: Request): DecodedUser | null {
@@ -34,7 +37,7 @@ export function verifyToken(req: Request): DecodedUser | null {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
+    const decoded = jwt.verify(token, getJwtSecret()) as AuthPayload;
     return decoded.user;
   } catch {
     return null;
