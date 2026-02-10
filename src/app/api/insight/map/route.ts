@@ -224,8 +224,6 @@ export async function GET(req: Request) {
         .lean(),
     ]);
     
-    // Mock missing data
-    const featureRaw: any[] = [];
     const prevNodes: any[] = [];
     const prevEdges: any[] = [];
 
@@ -264,18 +262,6 @@ export async function GET(req: Request) {
         intensity: clamp(Number(row.intensity || 0), 1, 5),
         confidence: clamp(Number(row.confidence || 0), 0, 1),
         source: 'chat',
-        createdAt: new Date(row.createdAt || now),
-      });
-    }
-
-    for (const row of featureRaw) {
-      const t = normalizeSignalType(row.signalType);
-      if (!t) continue;
-      signals.push({
-        signalType: t,
-        intensity: clamp(Number(row.intensity || 0), 1, 5),
-        confidence: clamp(Number(row.confidence || 0), 0, 1),
-        source: String(row.source || 'daily_pulse').trim() || 'daily_pulse',
         createdAt: new Date(row.createdAt || now),
       });
     }
@@ -348,12 +334,6 @@ export async function GET(req: Request) {
     };
 
     const questDays = new Set<string>();
-    for (const row of featureRaw) {
-      const src = String(row.source || '').trim();
-      if (!src.startsWith('quest') && src !== 'quest_log') continue;
-      const dt = new Date(row.createdAt || now);
-      if (dt >= start7d) questDays.add(toDayKey(dt));
-    }
     for (const q of questsRaw) {
       const created = new Date(q.date);
       if (created >= start7d) questDays.add(toDayKey(created));
