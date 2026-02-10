@@ -16,10 +16,6 @@ function isValidRatings(ratings: number[]): boolean {
   return Array.isArray(ratings) && ratings.length === 5 && ratings.every((value) => value >= 1 && value <= 5);
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
-}
-
 export async function POST(req: Request) {
   try {
     await dbConnect();
