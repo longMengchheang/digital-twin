@@ -90,6 +90,16 @@ export function computeDailyStreak(dates: Date[]): number {
   const uniqueDays = Array.from(new Set(dates.map((date) => getDayKey(new Date(date)))));
   const sortedDays = uniqueDays.sort((a, b) => (a < b ? 1 : -1));
 
+  // If the last activity was not today or yesterday, the streak is broken.
+  const todayKey = getDayKey(new Date());
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterdayKey = getDayKey(yesterdayDate);
+
+  if (sortedDays[0] !== todayKey && sortedDays[0] !== yesterdayKey) {
+    return 0;
+  }
+
   let streak = 1;
   for (let index = 1; index < sortedDays.length; index += 1) {
     const previous = new Date(`${sortedDays[index - 1]}T00:00:00`);
@@ -114,6 +124,8 @@ export interface BadgeContext {
   level: number;
   hasEarlyCheckIn: boolean;
   existingBadges?: string[];
+  weekendQuestCount?: number;
+  lateNightCheckInCount?: number;
 }
 
 export function deriveBadges(context: BadgeContext): string[] {
@@ -125,6 +137,8 @@ export function deriveBadges(context: BadgeContext): string[] {
   if (context.streak >= 30) badges.add('Streak Master');
   if (context.checkInCount >= 10) badges.add('Mindful');
   if (context.hasEarlyCheckIn) badges.add('Early Bird');
+  if ((context.weekendQuestCount || 0) >= 1) badges.add('Weekend Warrior');
+  if ((context.lateNightCheckInCount || 0) >= 1) badges.add('Night Owl');
 
   return Array.from(badges);
 }

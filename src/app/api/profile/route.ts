@@ -24,10 +24,26 @@ async function buildProfile(userId: string) {
     return null;
   }
 
-  const [totalQuests, completedQuests, checkIns] = await Promise.all([
+  const [totalQuests, completedQuests, checkIns, weekendQuestCount, lateNightCheckInCount] = await Promise.all([
     Quest.countDocuments({ userId }),
     Quest.countDocuments({ userId, completed: true }),
     CheckIn.find({ userId }).sort({ date: -1 }).limit(180).lean(),
+    Quest.countDocuments({
+      userId,
+      completed: true,
+      $expr: {
+        $in: [{ $dayOfWeek: "$completedDate" }, [1, 7]]
+      }
+    }),
+    CheckIn.countDocuments({
+      userId,
+      $expr: {
+        $or: [
+          { $gte: [{ $hour: "$date" }, 23] },
+          { $lt: [{ $hour: "$date" }, 4] }
+        ]
+      }
+    })
   ]);
 
   const streak = computeDailyStreak(checkIns.map((entry) => new Date(entry.date)));
@@ -41,6 +57,8 @@ async function buildProfile(userId: string) {
     level: user.level,
     hasEarlyCheckIn,
     existingBadges: user.badges,
+    weekendQuestCount,
+    lateNightCheckInCount,
   });
 
   if (JSON.stringify(badges) !== JSON.stringify(user.badges || [])) {

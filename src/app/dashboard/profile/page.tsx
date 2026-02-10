@@ -51,6 +51,8 @@ const badgeIcons: Record<string, string> = {
   "Streak Master": "🔥",
   Mindful: "🧠",
   "Early Bird": "🌅",
+  "Weekend Warrior": "🌲",
+  "Night Owl": "🦉",
 };
 
 export default function CharacterPage() {
