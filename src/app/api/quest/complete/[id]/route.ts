@@ -38,12 +38,12 @@ export async function PUT(req: Request, { params }: RouteContext) {
     quest.completed = nextCompleted;
     quest.progress = nextCompleted ? 100 : 0;
     quest.completedDate = nextCompleted ? new Date() : null;
-    await quest.save();
 
     const reward = QUEST_XP_REWARD[normalizeDuration(quest.duration)] || 0;
-    const progression = await adjustUserXP(user.id, nextCompleted ? reward : -reward);
-
-
+    const [progression] = await Promise.all([
+      adjustUserXP(user.id, nextCompleted ? reward : -reward),
+      quest.save(),
+    ]);
 
     return NextResponse.json({
       msg: nextCompleted ? 'Quest completed.' : 'Quest reopened.',
@@ -55,4 +55,3 @@ export async function PUT(req: Request, { params }: RouteContext) {
     return NextResponse.json({ msg: 'Server error.' }, { status: 500 });
   }
 }
-
