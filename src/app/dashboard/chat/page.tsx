@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Clock3, Hash, History, MessageCircle, Plus, Send, Sparkles, User } from "lucide-react";
+import { CHAT_CONSTANTS } from "@/lib/constants";
 
 interface ChatMessage {
   id: string;
@@ -29,16 +30,9 @@ interface ChatSummary {
 
 const ACTIVE_CHAT_STORAGE_KEY = "digital_twin_active_chat_id";
 
-const quickPrompts = [
-  "Reflect on this week",
-  "I feel stressed",
-  "Help me focus",
-  "My energy is low",
-];
-
 const introMessage: ChatMessage = {
   id: "intro",
-  text: "Hello. I'm active and listening. What's on your mind?",
+  text: CHAT_CONSTANTS.INTRO_MESSAGE,
   sender: "ai",
   timestamp: new Date(),
 };
@@ -222,7 +216,7 @@ export default function CompanionPage() {
       }
 
       startNewSession(false);
-      setErrorMessage("Unable to load chat history right now.");
+      setErrorMessage(CHAT_CONSTANTS.ERROR_LOAD_HISTORY);
     } finally {
       setBootstrapping(false);
     }
@@ -246,7 +240,7 @@ export default function CompanionPage() {
         return;
       }
 
-      setErrorMessage("Unable to open this conversation.");
+      setErrorMessage(CHAT_CONSTANTS.ERROR_OPEN_CONVERSATION);
     } finally {
       setHistoryLoadingId(null);
     }
@@ -284,7 +278,7 @@ export default function CompanionPage() {
       const reply = String(response.data?.reply || "").trim();
       const resolvedChatId = String(response.data?.chatId || "").trim();
       if (!reply) {
-        throw new Error("Empty AI response.");
+        throw new Error(CHAT_CONSTANTS.ERROR_EMPTY_RESPONSE);
       }
 
       if (resolvedChatId && resolvedChatId !== activeChatId) {
@@ -310,7 +304,7 @@ export default function CompanionPage() {
       const serverMessage =
         axios.isAxiosError(error) && typeof error.response?.data?.msg === "string"
           ? error.response.data.msg
-          : "Message failed to send.";
+          : CHAT_CONSTANTS.ERROR_SEND_FAILED;
       setErrorMessage(serverMessage);
     } finally {
       setIsLoading(false);
@@ -332,8 +326,8 @@ export default function CompanionPage() {
         <div className="flex items-center gap-3">
           <Hash className="h-5 w-5 text-[#9CA3AF]" />
           <div>
-            <h1 className="text-sm font-bold text-[#E5E7EB]">companion-chat</h1>
-            <p className="text-xs text-[#6B7280]">Private channel</p>
+            <h1 className="text-sm font-bold text-[#E5E7EB]">{CHAT_CONSTANTS.HEADER_TITLE}</h1>
+            <p className="text-xs text-[#6B7280]">{CHAT_CONSTANTS.HEADER_SUBTITLE}</p>
           </div>
         </div>
 
@@ -342,7 +336,7 @@ export default function CompanionPage() {
             type="button"
             onClick={() => startNewSession()}
             className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#2A2E3F] text-[#9CA3AF] transition-colors"
-            title="New Chat"
+            title={CHAT_CONSTANTS.NEW_CHAT_TOOLTIP}
           >
             <Plus className="h-5 w-5" />
           </button>
@@ -379,7 +373,7 @@ export default function CompanionPage() {
                   ))}
                 </div>
               ) : (
-                <p className="py-2 text-center text-xs text-[#6B7280]">No history yet.</p>
+                <p className="py-2 text-center text-xs text-[#6B7280]">{CHAT_CONSTANTS.NO_HISTORY}</p>
               )}
             </div>
           )}
@@ -401,7 +395,7 @@ export default function CompanionPage() {
               disabled={loadingMore}
               className="mx-auto text-xs font-medium text-[#6B7280] hover:text-[#E5E7EB] hover:underline"
             >
-              {loadingMore ? "Loading..." : "Load Older Messages"}
+              {loadingMore ? CHAT_CONSTANTS.LOADING : CHAT_CONSTANTS.LOAD_OLDER_MESSAGES}
             </button>
           )}
 
@@ -416,9 +410,9 @@ export default function CompanionPage() {
                     <div className="mb-4 rounded-full bg-[#1C1F2B] p-4 text-[#8B5CF6]">
                         <Sparkles className="h-8 w-8" />
                     </div>
-                    <h2 className="text-lg font-bold text-[#E5E7EB]">Welcome to the Link.</h2>
+                    <h2 className="text-lg font-bold text-[#E5E7EB]">{CHAT_CONSTANTS.WELCOME_TITLE}</h2>
                     <p className="mt-1 text-sm text-[#9CA3AF] max-w-xs">
-                        I am your digital twin. I'm ready to sync.
+                        {CHAT_CONSTANTS.WELCOME_SUBTITLE}
                     </p>
                 </div>
              ) : (
@@ -437,7 +431,7 @@ export default function CompanionPage() {
                       <div className={`flex max-w-[80%] flex-col ${message.sender === "user" ? "items-end" : "items-start"}`}>
                         <div className="flex items-baseline gap-2 mb-1">
                              <span className="text-sm font-bold text-[#E5E7EB]">
-                                 {message.sender === "ai" ? "Digital Twin" : "You"}
+                                 {message.sender === "ai" ? CHAT_CONSTANTS.AI_NAME : CHAT_CONSTANTS.USER_NAME}
                              </span>
                              <span className="text-[10px] text-[#6B7280]">
                                  {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -459,8 +453,8 @@ export default function CompanionPage() {
               </div>
               <div>
                  <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-sm font-bold text-[#E5E7EB]">Digital Twin</span>
-                      <span className="text-[10px] text-[#6B7280]">typing...</span>
+                      <span className="text-sm font-bold text-[#E5E7EB]">{CHAT_CONSTANTS.AI_NAME}</span>
+                      <span className="text-[10px] text-[#6B7280]">{CHAT_CONSTANTS.TYPING}</span>
                  </div>
                  <div className="flex gap-1">
                    <span className="h-1.5 w-1.5 rounded-full bg-[#8B5CF6] animate-pulse" />
@@ -482,7 +476,7 @@ export default function CompanionPage() {
              {/* Suggestion Chips */}
              {messages.length < 3 && (
                 <div className="flex gap-2 p-2 overflow-x-auto pb-0 border-b border-[#2A2E3F]/50">
-                    {quickPrompts.map((prompt) => (
+                    {CHAT_CONSTANTS.QUICK_PROMPTS.map((prompt) => (
                     <button
                         key={prompt}
                         type="button"
@@ -500,7 +494,7 @@ export default function CompanionPage() {
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Message #companion-chat"
+                placeholder={CHAT_CONSTANTS.INPUT_PLACEHOLDER}
                 className="min-h-[44px] max-h-[140px] flex-1 resize-none bg-transparent px-4 py-3 text-[0.93rem] text-[#E5E7EB] placeholder:text-[#6B7280] outline-none"
                 rows={1}
                 />
