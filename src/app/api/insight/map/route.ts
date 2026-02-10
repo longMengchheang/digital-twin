@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import { normalizeSignalType } from '@/lib/chat-signals';
+import { clamp } from '@/lib/math';
 import ChatSignal from '@/lib/models/ChatSignal';
 import CheckIn from '@/lib/models/CheckIn';
 import Quest from '@/lib/models/Quest';
@@ -117,7 +118,6 @@ const NODE_PALETTE: Record<NodeType, Record<NodeState, string>> = {
   Quest: { low: '#c4b5fd', medium: '#a78bfa', high: '#8b5cf6' },
 };
 
-const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
 const clamp100 = (v: number) => clamp(Math.round(v), 0, 100);
 const avg = (arr: number[]) => (arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0);
 const startDay = (d: Date) => { const n = new Date(d); n.setHours(0, 0, 0, 0); return n; };
