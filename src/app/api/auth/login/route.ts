@@ -18,7 +18,8 @@ const loginLimiter = new RateLimiter(60 * 1000, 5);
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get('x-forwarded-for') || 'unknown';
+    const forwarded = req.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
 
     if (!loginLimiter.check(ip)) {
       return tooManyRequests('Too many login attempts. Please try again later.');
