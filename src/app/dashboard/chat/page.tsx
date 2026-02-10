@@ -56,16 +56,6 @@ function toUiMessage(message: ServerMessage, fallbackId: string): ChatMessage | 
   };
 }
 
-function formatHistoryTime(value: string): string {
-  const date = new Date(value);
-  return date.toLocaleString([], {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export default function CompanionPage() {
   const router = useRouter();
 
