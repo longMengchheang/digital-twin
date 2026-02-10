@@ -399,11 +399,13 @@ export async function POST(req: Request) {
       }
     }
 
-    const historyRows = await ChatMessage.find({ chatId, userId: user.id })
-      .select('role content')
-      .sort({ createdAt: -1 })
-      .limit(24)
-      .lean();
+    const historyRows = !requestedChatId
+      ? []
+      : await ChatMessage.find({ chatId, userId: user.id })
+          .select('role content')
+          .sort({ createdAt: -1 })
+          .limit(24)
+          .lean();
 
     const history: ConversationEntry[] = [...historyRows]
       .reverse()
