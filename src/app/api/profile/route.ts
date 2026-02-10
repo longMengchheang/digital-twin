@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { withAuth } from '@/lib/auth';
 import { computeDailyStreak, deriveBadges, getMoodFromCheckIn } from '@/lib/progression';
@@ -18,8 +18,13 @@ interface ProfileUpdatePayload {
   avatarStage?: string;
 }
 
-async function buildProfile(userId: string) {
-  const user = await User.findById(userId).lean();
+export async function buildProfile(userId: string, userObj?: any) {
+  let user = userObj;
+
+  if (!user) {
+    user = await User.findById(userId).lean();
+  }
+
   if (!user) {
     return null;
   }
@@ -163,7 +168,9 @@ export const PUT = withAuth(async (req, _context, authUser) => {
 
     await user.save();
 
-    const profile = await buildProfile(authUser.id);
+    // Pass the updated user object to avoid redundant fetch
+    // Using .toObject() to match .lean() behavior
+    const profile = await buildProfile(authUser.id, user.toObject());
     return NextResponse.json({ profile });
   } catch (error) {
     console.error('Profile update error:', error);
