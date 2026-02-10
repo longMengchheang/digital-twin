@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import User from "@/lib/models/User";
-import { badRequest, successResponse, serverError } from "@/lib/api-response";
+import { badRequest, successResponse, serverError, tooManyRequests } from "@/lib/api-response";
 import { sendEmail } from "@/lib/email";
+import { RateLimiter } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
+// 5 requests per minute
+const forgotPasswordLimiter = new RateLimiter(60 * 1000, 5);
+
 export async function POST(req: Request) {
   try {
+    const forwarded = req.headers.get("x-forwarded-for");
+    const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
+
+    if (!forgotPasswordLimiter.check(ip)) {
+      return tooManyRequests("Too many requests. Please try again later.");
+    }
+
     await dbConnect();
 
     const { email } = await req.json();
