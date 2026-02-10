@@ -2,11 +2,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import { normalizeSignalType } from '@/lib/chat-signals';
-// import BehaviorConnection from '@/lib/models/BehaviorConnection';
-// import BehaviorNode from '@/lib/models/BehaviorNode';
 import ChatSignal from '@/lib/models/ChatSignal';
 import CheckIn from '@/lib/models/CheckIn';
-// import FeatureSignal from '@/lib/models/FeatureSignal';
 import Quest from '@/lib/models/Quest';
 import User from '@/lib/models/User';
 
@@ -200,13 +197,6 @@ function mapUpdate(
   return { changed: false, changeType: 'stable' as const, message: 'No major behavior pattern shift detected since last update.' };
 }
 
-function dbNodeType(type: NodeType): 'mood' | 'signal' | 'habit' | 'routine' | 'quest' {
-  if (type === 'Mood') return 'mood';
-  if (type === 'Signal') return 'signal';
-  if (type === 'Habit') return 'habit';
-  if (type === 'Routine') return 'routine';
-  return 'quest';
-}
 export async function GET(req: Request) {
   try {
     await dbConnect();
@@ -232,17 +222,6 @@ export async function GET(req: Request) {
         .sort({ createdAt: -1 })
         .limit(1600)
         .lean(),
-      // FeatureSignal.find({ userId: authUser.id, createdAt: { $gte: start30d } })
-      //   .select('source signalType intensity confidence createdAt')
-      //   .sort({ createdAt: -1 })
-      //   .limit(1600)
-      //   .lean(),
-      // BehaviorNode.find({ userId: authUser.id })
-      //   .select('nodeKey label strength occurrences')
-      //   .lean(),
-      // BehaviorConnection.find({ userId: authUser.id })
-      //   .select('fromNodeKey toNodeKey weight')
-      //   .lean(),
     ]);
     
     // Mock missing data
@@ -568,51 +547,6 @@ export async function GET(req: Request) {
       nodes,
       filteredEdges,
     );
-
-    const ts = new Date();
-
-    if (nodes.length) {
-      const nodeOps = nodes.map((n) => ({
-        updateOne: {
-          filter: { userId: authUser.id, nodeKey: n.id },
-          update: {
-            $set: {
-              nodeType: dbNodeType(n.type),
-              label: n.label,
-              strength: n.score,
-              occurrences: n.occurrences,
-              lastUpdated: ts,
-              updatedAt: ts,
-            },
-            $setOnInsert: { createdAt: ts },
-          },
-          upsert: true,
-        },
-      }));
-      // await BehaviorNode.bulkWrite(nodeOps);
-    }
-
-    if (filteredEdges.length) {
-      const edgeOps = filteredEdges.map((e) => ({
-        updateOne: {
-          filter: { userId: authUser.id, fromNodeKey: e.source, toNodeKey: e.target },
-          update: {
-            $set: {
-              weight: e.score,
-              reason: e.reason,
-              lastUpdated: ts,
-              updatedAt: ts,
-            },
-            $setOnInsert: { createdAt: ts },
-          },
-          upsert: true,
-        },
-      }));
-      // await BehaviorConnection.bulkWrite(edgeOps);
-    }
-
-    // await BehaviorNode.deleteMany({ userId: authUser.id, lastUpdated: { $lt: ts } });
-    // await BehaviorConnection.deleteMany({ userId: authUser.id, lastUpdated: { $lt: ts } });
 
     const suggestions = nodes.map((n) => n.suggestion).filter((v, i, arr) => v && arr.indexOf(v) === i).slice(0, 4);
     const stress = statsMap.get('stress');
