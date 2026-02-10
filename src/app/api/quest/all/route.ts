@@ -15,8 +15,27 @@ export async function GET(req: Request) {
       return unauthorized('No token, authorization denied.');
     }
 
+    const { searchParams } = new URL(req.url);
+
+    const paramLimit = parseInt(searchParams.get('limit') || '1000', 10);
+    const limit = isNaN(paramLimit) || paramLimit < 1 ? 1000 : Math.min(paramLimit, 1000);
+
+    const paramSkip = parseInt(searchParams.get('skip') || '0', 10);
+    const skip = isNaN(paramSkip) || paramSkip < 0 ? 0 : paramSkip;
+
     const quests = await Quest.find({ userId: user.id })
       .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select({
+        goal: 1,
+        duration: 1,
+        progress: 1,
+        completed: 1,
+        date: 1,
+        completedDate: 1,
+        ratings: { $slice: 1 },
+      })
       .lean();
 
     return NextResponse.json(
