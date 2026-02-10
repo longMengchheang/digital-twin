@@ -425,16 +425,8 @@ export async function POST(req: Request) {
     const userMessageTimestamp = new Date();
     const aiMessageTimestamp = new Date();
 
-    const userMessageDoc = new ChatMessage({
-      userId: user.id,
-      chatId,
-      role: 'user',
-      content: message,
-      createdAt: userMessageTimestamp,
-      updatedAt: userMessageTimestamp,
-    });
-
-    const userMessageId = String(userMessageDoc._id);
+    const userMessageObjectId = new mongoose.Types.ObjectId();
+    const userMessageId = String(userMessageObjectId);
 
     // Fire and forget signal extraction to avoid blocking the UI
     persistStructuredSignals(user.id, userMessageId, message, companionResult.model).catch((err) => {
@@ -442,15 +434,25 @@ export async function POST(req: Request) {
     });
 
     await Promise.all([
-      userMessageDoc.save(),
-      ChatMessage.create({
-        userId: user.id,
-        chatId,
-        role: 'ai',
-        content: companionResult.text,
-        createdAt: aiMessageTimestamp,
-        updatedAt: aiMessageTimestamp,
-      }),
+      ChatMessage.insertMany([
+        {
+          _id: userMessageObjectId,
+          userId: user.id,
+          chatId,
+          role: 'user',
+          content: message,
+          createdAt: userMessageTimestamp,
+          updatedAt: userMessageTimestamp,
+        },
+        {
+          userId: user.id,
+          chatId,
+          role: 'ai',
+          content: companionResult.text,
+          createdAt: aiMessageTimestamp,
+          updatedAt: aiMessageTimestamp,
+        },
+      ]),
       ChatConversation.findOneAndUpdate(
         { _id: chatId, userId: user.id },
         {
