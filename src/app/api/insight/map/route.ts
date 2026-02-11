@@ -75,6 +75,27 @@ type SignalStats = {
   highDays7: Set<string>;
 };
 
+type FeatureSignalRaw = {
+  signalType?: string;
+  intensity?: number;
+  confidence?: number;
+  source?: string;
+  createdAt?: Date | string;
+};
+
+type BehaviorNodeRaw = {
+  nodeKey: string;
+  label: string;
+  strength?: number;
+  occurrences?: number;
+};
+
+type BehaviorEdgeRaw = {
+  fromNodeKey: string;
+  toNodeKey: string;
+  weight?: number;
+};
+
 const DAY_MS = 86400000;
 const DECAY_FACTOR = 4.5;
 
@@ -226,7 +247,9 @@ export async function GET(req: Request) {
     ]);
     
     // Mock missing data
-    const featureRaw: any[] = [];
+    const featureRaw: FeatureSignalRaw[] = [];
+    const prevNodes: BehaviorNodeRaw[] = [];
+    const prevEdges: BehaviorEdgeRaw[] = [];
 
     if (!user) {
       return NextResponse.json({ msg: 'User not found.' }, { status: 404 });
