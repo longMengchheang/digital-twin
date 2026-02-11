@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { clamp } from "@/lib/math";
 import {
   Activity,
   BrainCircuit,
@@ -122,7 +123,7 @@ export default function Sidebar() {
 
   const progressPercent = useMemo(() => {
     if (!progress.requiredXP) return 0;
-    return Math.max(0, Math.min(100, Math.round((progress.currentXP / progress.requiredXP) * 100)));
+    return clamp(Math.round((progress.currentXP / progress.requiredXP) * 100), 0, 100);
   }, [progress.currentXP, progress.requiredXP]);
 
   const handleSignOut = () => {

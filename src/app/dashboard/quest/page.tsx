@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import confetti from "canvas-confetti";
+import { clamp } from "@/lib/math";
 import {
   AlertTriangle,
   Calendar,
@@ -204,7 +205,7 @@ export default function QuestLogPage() {
   const updateProgress = async (id: string, nextProgress: number) => {
     try {
       const token = localStorage.getItem("token");
-      const normalizedProgress = Math.max(0, Math.min(100, nextProgress));
+      const normalizedProgress = clamp(nextProgress, 0, 100);
 
       const response = await axios.put(
         `/api/quest/progress/${id}`,
