@@ -22,6 +22,9 @@ const chatSignalSchema = new Schema(
   { timestamps: true }
 );
 
+// Compound index for optimized analytics queries filtering by user and sorted by time
+chatSignalSchema.index({ userId: 1, createdAt: -1 });
+
 const ChatSignal: Model<IChatSignal> =
   mongoose.models.ChatSignal || mongoose.model<IChatSignal>('ChatSignal', chatSignalSchema);
 
