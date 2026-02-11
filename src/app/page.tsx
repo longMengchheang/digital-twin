@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Activity, ArrowRight, BarChart2, MessageCircle, Target, User, Zap } from "lucide-react";
+import { ArrowRight, FileText, Lightbulb, MessageCircle, Target, User, Zap, Activity } from "lucide-react";
 import { validatePassword } from "@/lib/validation";
 
 type FlashType = "success" | "error";
@@ -176,9 +176,9 @@ export default function AuthPage() {
 
           <div className="relative z-10 mt-12 space-y-3">
             {[
-              { label: "Daily Pulse", icon: <Activity className="h-4 w-4" /> },
+              { label: "Daily Log", icon: <FileText className="h-4 w-4" /> },
               { label: "Quest Log", icon: <Target className="h-4 w-4" /> },
-              { label: "Mind Map", icon: <BarChart2 className="h-4 w-4" /> },
+              { label: "Insight", icon: <Lightbulb className="h-4 w-4" /> },
               { label: "Companion", icon: <MessageCircle className="h-4 w-4" /> },
             ].map((item) => (
               <div
@@ -218,6 +218,7 @@ export default function AuthPage() {
           </div>
 
           <h2 className="text-2xl font-bold tracking-tight text-white mb-2">{pageTitle}</h2>
+          <p className="text-sm text-[#9CA3AF]">Explore your thoughts.</p>
           <p className="text-sm text-[#9CA3AF] mb-8">
             {isLogin ? "Enter your credentials to access the system." : "Create a new biological profile."}
           </p>

@@ -104,6 +104,7 @@ const OUTER_NODE_POSITIONS = [
   { x: 100, y: 180 },
 ];
 
+const NODE_TYPES = ["All", "Core", "Insight", "Project", "Memory"];
 const EDGE_STYLE: Record<EdgeStrength, { width: number; opacity: number; dasharray?: string }> = {
   weak: { width: 1.5, opacity: 0.2, dasharray: "4 4" },
   medium: { width: 2.5, opacity: 0.4 },
@@ -420,66 +421,69 @@ export default function MindMapPage() {
 
       {/* Floating Node Detail Modal */}
       {selectedNode && (
-        <div className="fixed inset-0 z-[2200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedNodeId(null)}>
-          <div 
-            className="w-full max-w-sm overflow-hidden rounded-xl border border-[#2A2E3F] bg-[#151823] shadow-2xl animate-slide-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="border-b border-[#2A2E3F] px-6 py-4 bg-[#1C1F2B]">
-              <div className="flex items-center justify-between">
-                <div>
-                   <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider opacity-80" style={{ color: "#9CA3AF" }}>
-                    {selectedNode.type}
-                  </span>
-                  <h3 className="text-xl font-bold text-[#E5E7EB]">{selectedNode.label}</h3>
+        <div className="fixed inset-0 z-[5000] overflow-y-auto bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedNodeId(null)}>
+          <div className="flex min-h-full items-start justify-center p-4 pt-24">
+            <div 
+              className="relative w-full max-w-sm overflow-hidden rounded-xl border border-[#2A2E3F] bg-[#151823] shadow-2xl animate-slide-up"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="border-b border-[#2A2E3F] px-6 py-4 bg-[#1C1F2B]">
+                <div className="flex items-center justify-between">
+                  <div>
+                     <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider opacity-80" style={{ color: "#9CA3AF" }}>
+                      {selectedNode.type}
+                    </span>
+                    <h1 className="text-2xl font-bold text-[#E5E7EB]">Insight: {selectedNode.label}</h1>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedNodeId(null)}
+                    className="rounded p-1 text-[#6B7280] hover:bg-[#2A2E3F] hover:text-[#E5E7EB]"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-                <button 
-                  onClick={() => setSelectedNodeId(null)}
-                  className="rounded p-1 text-[#6B7280] hover:bg-[#2A2E3F] hover:text-[#E5E7EB]"
-                >
-                  <X className="h-4 w-4" />
-                </button>
               </div>
-            </div>
-            
-            <div className="space-y-4 p-6">
-              <p className="text-sm leading-relaxed text-[#D1D5DB]">{selectedNode.summary}</p>
               
-              <div className="space-y-2 rounded-lg bg-[#0F111A] p-4 border border-[#2A2E3F]">
-                 <div className="flex justify-between text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wide">
-                    <span>Signal Strength</span>
-                    <span>{selectedNode.score}/100</span>
+              <div className="space-y-4 p-6">
+                <p className="text-sm leading-relaxed text-[#D1D5DB]">{selectedNode.summary}</p>
+                
+                <div className="space-y-2 rounded-lg bg-[#0F111A] p-4 border border-[#2A2E3F]">
+                   <div className="flex justify-between text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wide">
+                      <span>Signal Strength</span>
+                      <span>{selectedNode.score}/100</span>
+                   </div>
+                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#1C1F2B]">
+                      <div 
+                          className="h-full rounded-full transition-all duration-500" 
+                          style={{ width: `${selectedNode.score}%`, backgroundColor: "#8B5CF6" }}
+                      />
+                   </div>
+                </div>
+
+                 <div className="space-y-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wide text-[#6B7280]">Recent Signals</h4>
+                     <ul className="text-sm text-[#D1D5DB] space-y-2">
+                       {selectedNode.details.slice(0, 3).map((detail, i) => (
+                         <li key={i} className="flex items-start gap-2">
+                           <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#3B82F6]" />
+                           {detail}
+                         </li>
+                       ))}
+                     </ul>
                  </div>
-                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#1C1F2B]">
-                    <div 
-                        className="h-full rounded-full transition-all duration-500" 
-                        style={{ width: `${selectedNode.score}%`, backgroundColor: "#8B5CF6" }}
-                    />
-                 </div>
+
+                 {selectedNode.suggestion && (
+                   <div className="rounded border border-[#8B5CF6]/30 bg-[#8B5CF6]/10 p-3 text-sm text-[#E5E7EB]">
+                      <span className="font-bold block mb-1 text-[#A78BFA] text-xs uppercase">Recommended Protocol</span>
+                      {selectedNode.suggestion}
+                   </div>
+                 )}
               </div>
-
-               <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wide text-[#6B7280]">Recent Signals</h4>
-                   <ul className="text-sm text-[#D1D5DB] space-y-2">
-                     {selectedNode.details.slice(0, 3).map((detail, i) => (
-                       <li key={i} className="flex items-start gap-2">
-                         <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#3B82F6]" />
-                         {detail}
-                       </li>
-                     ))}
-                   </ul>
-               </div>
-
-               {selectedNode.suggestion && (
-                 <div className="rounded border border-[#8B5CF6]/30 bg-[#8B5CF6]/10 p-3 text-sm text-[#E5E7EB]">
-                    <span className="font-bold block mb-1 text-[#A78BFA] text-xs uppercase">Recommended Protocol</span>
-                    {selectedNode.suggestion}
-                 </div>
-               )}
             </div>
           </div>
         </div>
       )}
     </div>
+
   );
 }

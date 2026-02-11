@@ -13,6 +13,7 @@ import {
   Plus,
   Target,
   Trophy,
+  Trash2,
   Zap,
 } from "lucide-react";
 
@@ -24,7 +25,9 @@ interface Quest {
   completed: boolean;
   createdAt: string;
   completedDate?: string;
+  recurrencesLeft?: number;
 }
+
 
 interface ToastMessage {
   id: number;
@@ -73,19 +76,53 @@ const durationMeta: Record<
   },
 };
 
+const getDurationMeta = (durationKey: string) => {
+  return durationMeta[durationKey.toLowerCase()] ?? durationMeta.daily;
+};
+
 export default function QuestLogPage() {
   const [quests, setQuests] = useState<Quest[]>([]);
   const [goal, setGoal] = useState("");
   const [duration, setDuration] = useState("daily");
+  const [recurrences, setRecurrences] = useState("");
   const [busy, setBusy] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     void fetchQuests();
   }, []);
 
   const activeQuests = useMemo(() => quests.filter((quest) => !quest.completed), [quests]);
-  const completedQuests = useMemo(() => quests.filter((quest) => quest.completed), [quests]);
+  
+  const completedQuestsStacked = useMemo(() => {
+    const completed = quests.filter((quest) => quest.completed);
+    const groups: Record<string, { goal: string; count: number; totalReward: number; duration: string }> = {};
+
+    for (const quest of completed) {
+      const normalizedGoal = quest.goal.trim().toLowerCase();
+      
+      if (!groups[normalizedGoal]) {
+        groups[normalizedGoal] = { 
+            goal: quest.goal, // Use the first encounter's casing, we'll capitalize later or here
+            count: 0, 
+            totalReward: 0,
+            duration: quest.duration 
+        };
+      }
+
+      groups[normalizedGoal].count += 1;
+      groups[normalizedGoal].totalReward += getDurationMeta(quest.duration).reward;
+    }
+
+    // Convert back to array
+    return Object.values(groups).sort((a, b) => b.totalReward - a.totalReward);
+  }, [quests]);
+
+  const totalXPGained = useMemo(() => {
+     return quests.filter(q => q.completed).reduce((sum, q) => sum + getDurationMeta(q.duration).reward, 0);
+  }, [quests]);
+
 
   const addToast = (title: string, message: string, tone: "success" | "error" = "success") => {
     const id = Date.now();
@@ -93,10 +130,6 @@ export default function QuestLogPage() {
     setTimeout(() => {
       setToasts((current) => current.filter((toast) => toast.id !== id));
     }, 3600);
-  };
-
-  const getDurationMeta = (durationKey: string) => {
-    return durationMeta[durationKey.toLowerCase()] ?? durationMeta.daily;
   };
 
   const fetchQuests = async () => {
@@ -126,10 +159,12 @@ export default function QuestLogPage() {
           completed: Boolean(quest.completed),
           createdAt: quest.date ?? quest.createdAt ?? new Date().toISOString(),
           completedDate: quest.completedDate,
+          recurrencesLeft: (quest as any).recurrencesLeft,
         }),
       );
 
       setQuests(mapped);
+      console.log('[Frontend] Mapped Quests:', mapped);
     } catch {
       addToast("Quest sync failed", "Unable to load quest log.", "error");
     }
@@ -147,9 +182,16 @@ export default function QuestLogPage() {
 
     try {
       const token = localStorage.getItem("token");
+      const payload = { 
+            goal: goal.trim(), 
+            duration,
+            recurrences: recurrences ? parseInt(recurrences) : undefined
+      };
+      console.log('[Frontend] Creating Quest Payload:', payload);
+
       const response = await axios.post(
         "/api/quest/create",
-        { goal: goal.trim(), duration },
+        payload,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -163,16 +205,40 @@ export default function QuestLogPage() {
         progress: Number(quest.progress ?? 0),
         completed: Boolean(quest.completed),
         createdAt: quest.date ?? new Date().toISOString(),
+        recurrencesLeft: quest.recurrencesLeft,
       };
 
       setQuests((current) => [createdQuest, ...current]);
       setGoal("");
       setDuration("daily");
+      setRecurrences("");
       addToast("Quest created", "Your quest is now active.");
     } catch {
       addToast("Create failed", "Could not create quest.", "error");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const executeDelete = async () => {
+    if (!deleteId) return;
+    const id = deleteId;
+    setDeleteId(null);
+
+    // Optimistic update
+    const previousQuests = [...quests];
+    setQuests((current) => current.filter((q) => q.id !== id));
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`/api/quest/delete/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      addToast("Quest deleted", "The quest has been removed.");
+    } catch {
+      // Revert on failure
+      setQuests(previousQuests);
+      addToast("Delete failed", "Could not delete quest.", "error");
     }
   };
 
@@ -241,6 +307,7 @@ export default function QuestLogPage() {
   };
 
   return (
+    <>
     <div className="mx-auto w-full max-w-5xl animate-fade-in space-y-8 pb-10 text-[#E5E7EB]">
       <header className="text-center md:text-left flex items-center gap-3">
         <div className="p-2 rounded bg-[#8B5CF6]/10 text-[#8B5CF6]">
@@ -273,7 +340,7 @@ export default function QuestLogPage() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-[#9CA3AF]">Completed</p>
-              <p className="text-xl font-bold text-white">{completedQuests.length}</p>
+              <p className="text-xl font-bold text-white">{quests.filter(q => q.completed).length}</p>
             </div>
           </div>
         </article>
@@ -286,7 +353,7 @@ export default function QuestLogPage() {
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-[#9CA3AF]">XP Gained</p>
               <p className="text-xl font-bold text-white">
-                {completedQuests.reduce((total, quest) => total + getDurationMeta(quest.duration).reward, 0)}
+                {totalXPGained}
               </p>
             </div>
           </div>
@@ -326,6 +393,11 @@ export default function QuestLogPage() {
                             {meta.label}
                           </span>
                           <span className="text-xs font-bold text-[#6B7280]">+{meta.reward} XP</span>
+                          {quest.recurrencesLeft !== undefined && quest.recurrencesLeft !== null && (
+                             <span className="ml-2 text-[10px] font-bold text-[#8B5CF6]">
+                               {quest.recurrencesLeft} Left
+                             </span>
+                          )}
                         </div>
                         <h3 className="text-lg font-bold text-[#E5E7EB] group-hover:text-white transition-colors">{quest.goal}</h3>
                       </div>
@@ -379,9 +451,61 @@ export default function QuestLogPage() {
               })
             )}
           </div>
-        </div>
 
-        <div className="space-y-8">
+          <div className="space-y-6 pt-8 border-t border-[#2A2E3F]">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-[#E5E7EB]">
+            Completed Quests
+          </h2>
+          <div className="space-y-4">
+             {quests.filter(q => q.completed).length === 0 ? (
+                <p className="text-sm text-[#6B7280]">No quests completed yet.</p>
+             ) : (
+                quests.filter(q => q.completed).sort((a, b) => new Date(b.completedDate || 0).getTime() - new Date(a.completedDate || 0).getTime()).map(quest => {
+                   const meta = getDurationMeta(quest.duration);
+                   return (
+                    <article key={quest.id} className="group relative overflow-hidden rounded-xl border border-[#2A2E3F]/50 bg-[#1C1F2B]/50 p-4 opacity-75 grayscale-[0.3] hover:grayscale-0 hover:opacity-100 transition-all">
+                       <button
+                          onClick={(e) => {
+                             e.stopPropagation();
+                             setDeleteId(quest.id);
+                          }}
+                          className="absolute top-2 right-2 z-20 rounded-lg p-1.5 text-[#6B7280] opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+                          title="Delete Quest"
+                       >
+                          <Trash2 className="h-3.5 w-3.5" />
+                       </button>
+                       <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#34D399]/10 text-[#34D399]">
+                                <Check className="h-4 w-4" />
+                             </div>
+                             <div>
+                                <h3 className="font-bold text-[#E5E7EB] line-through decoration-[#6B7280]/50">{quest.goal}</h3>
+                                <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
+                                   <span>{meta.label}</span>
+                                   <span>•</span>
+                                   <span>Completed {new Date(quest.completedDate!).toLocaleDateString()}</span>
+                                   <span>•</span>
+                                   <span className="text-[#8B5CF6]">
+                                      {quest.recurrencesLeft === undefined || quest.recurrencesLeft === null
+                                        ? "Infinite Loop" 
+                                        : quest.recurrencesLeft === 0 
+                                            ? "Final Cycle" 
+                                            : `${quest.recurrencesLeft} Repeats Left`}
+                                   </span>
+                                </div>
+                             </div>
+                          </div>
+                      </div>
+                    </article>
+                   );
+                })
+             )}
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-8">
           {/* Create Quest Section */}
           <section className="rounded-xl border border-[#2A2E3F] bg-[#151823] p-5 shadow-sm">
             <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[#9CA3AF]">
@@ -390,26 +514,43 @@ export default function QuestLogPage() {
             </h2>
 
             <form onSubmit={handleCreateQuest} className="space-y-4">
-              <div>
-                <label htmlFor="duration" className="mb-1.5 block text-xs font-semibold text-[#9CA3AF]">
-                  Type
-                </label>
-                <div className="relative">
-                  <select
-                    id="duration"
-                    value={duration}
-                    onChange={(event) => setDuration(event.target.value)}
-                    className="input-discord appearance-none bg-[#0F111A]"
-                  >
-                    {Object.entries(durationMeta).map(([key, meta]) => (
-                      <option key={key} value={key}>
-                        {meta.label} (+{meta.reward} XP)
-                      </option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280]">
-                    <Clock className="h-4 w-4" />
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label htmlFor="duration" className="mb-1.5 block text-xs font-semibold text-[#9CA3AF]">
+                    Type
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="duration"
+                      value={duration}
+                      onChange={(event) => setDuration(event.target.value)}
+                      className="input-discord appearance-none bg-[#0F111A]"
+                    >
+                      {Object.entries(durationMeta).map(([key, meta]) => (
+                        <option key={key} value={key}>
+                          {meta.label} (+{meta.reward} XP)
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280]">
+                      <Clock className="h-4 w-4" />
+                    </div>
                   </div>
+                </div>
+                
+                <div className="w-1/3">
+                   <label htmlFor="recurrences" className="mb-1.5 block text-xs font-semibold text-[#9CA3AF]">
+                    Repeats
+                  </label>
+                  <input
+                    id="recurrences"
+                    type="number"
+                    min="1"
+                    value={recurrences}
+                    onChange={(e) => setRecurrences(e.target.value)}
+                    placeholder="∞"
+                    className="input-discord placeholder:text-[#6B7280] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
                 </div>
               </div>
 
@@ -445,26 +586,29 @@ export default function QuestLogPage() {
               Completed Logs
             </h2>
 
-            {completedQuests.length === 0 ? (
+            {completedQuestsStacked.length === 0 ? (
               <div className="rounded-lg border border-dashed border-[#2A2E3F] p-6 text-center">
                 <p className="text-xs text-[#6B7280]">No completed quests logged yet.</p>
               </div>
             ) : (
               <div className="space-y-2">
-                {completedQuests.slice(0, 5).map((quest) => {
-                  const meta = getDurationMeta(quest.duration);
+                {completedQuestsStacked.slice(0, 5).map((group, index) => {
+                  const meta = getDurationMeta(group.duration);
                   return (
                     <div
-                      key={quest.id}
+                      key={index}
                       className="group flex items-center gap-3 rounded-lg bg-[#0F111A] p-3 border border-[#2A2E3F] transition-colors hover:border-[#34D399]/30"
                     >
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-[#34D399]/10 text-[#34D399]">
                         <Check className="h-3 w-3" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-[#E5E7EB]">{quest.goal}</p>
+                        <p className="truncate text-sm font-medium text-[#E5E7EB]">
+                          <span className="capitalize">{group.goal}</span>
+                          {group.count > 1 && <span className="ml-2 text-xs text-[#6B7280]">(x{group.count})</span>}
+                        </p>
                       </div>
-                      <span className="text-xs font-bold text-[#34D399]">+{meta.reward}</span>
+                      <span className="text-xs font-bold text-[#34D399]">+{group.totalReward}</span>
                     </div>
                   );
                 })}
@@ -473,6 +617,7 @@ export default function QuestLogPage() {
           </section>
         </div>
       </section>
+    </div>
 
       {/* Modern Toasts */}
       <div className="fixed bottom-6 right-6 z-[2200] space-y-3">
@@ -498,6 +643,37 @@ export default function QuestLogPage() {
           </div>
         ))}
       </div>
-    </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-[2500] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-xl border border-[#2A2E3F] bg-[#151823] p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-500 mx-auto">
+              <Trash2 className="h-6 w-6" />
+            </div>
+            
+            <h3 className="mb-2 text-center text-lg font-bold text-white">Delete Quest?</h3>
+            <p className="mb-6 text-center text-sm text-[#9CA3AF]">
+              Are you sure you want to delete this quest? This action cannot be undone.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteId(null)}
+                className="flex-1 rounded-lg bg-[#2A2E3F] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#374151]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeDelete}
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

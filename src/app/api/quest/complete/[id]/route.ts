@@ -40,6 +40,78 @@ export async function PUT(req: Request, { params }: RouteContext) {
     quest.completedDate = nextCompleted ? new Date() : null;
 
     const reward = QUEST_XP_REWARD[normalizeDuration(quest.duration)] || 0;
+    
+    // Recurring Logic
+    if (nextCompleted) {
+      const now = new Date();
+      let nextDate = new Date(now);
+      
+      // Determine next start date based on duration
+      switch (quest.duration) {
+        case 'daily':
+          nextDate.setDate(now.getDate() + 1);
+          nextDate.setHours(0, 0, 0, 0); // Start of next day
+          break;
+        case 'weekly':
+          nextDate.setDate(now.getDate() + 7);
+          nextDate.setHours(0, 0, 0, 0);
+          break;
+        case 'monthly':
+          nextDate.setMonth(now.getMonth() + 1);
+          nextDate.setHours(0, 0, 0, 0);
+          break;
+        case 'yearly':
+          nextDate.setFullYear(now.getFullYear() + 1);
+          nextDate.setHours(0, 0, 0, 0);
+          break;
+        default:
+          // No recurrence for unknown types, or treat as daily? 
+          // Assuming 'one-time' isn't a type here based on IQuest interface, 
+          // but if it was, we'd break. The interface says daily/weekly/monthly/yearly.
+          // Fallback to daily if valid enum compliance issues, or just break.
+          // Let's assume daily fallback for safety if sticking to enum.
+           nextDate.setDate(now.getDate() + 1);
+           nextDate.setHours(0, 0, 0, 0);
+          break;
+      }
+
+      // Check if future quest already exists to prevent duplicates
+      const existingFutureQuest = await Quest.findOne({
+        userId: user.id,
+        goal: quest.goal,
+        duration: quest.duration,
+        date: { $gte: nextDate },
+        completed: false
+      });
+
+      if (!existingFutureQuest) {
+        // Handle recurrences
+        let nextRecurrencesLeft = quest.recurrencesLeft;
+        let shouldCreate = true;
+
+        if (typeof nextRecurrencesLeft === 'number') {
+           if (nextRecurrencesLeft > 0) {
+             nextRecurrencesLeft -= 1;
+           } else {
+             shouldCreate = false;
+           }
+        }
+
+        if (shouldCreate) {
+          await Quest.create({
+            userId: user.id,
+            goal: quest.goal,
+            duration: quest.duration,
+            date: nextDate,
+            progress: 0,
+            completed: false,
+            ratings: [],
+            recurrencesLeft: nextRecurrencesLeft
+          });
+        }
+      }
+    }
+
     const [progression] = await Promise.all([
       adjustUserXP(user.id, nextCompleted ? reward : -reward),
       quest.save(),

@@ -22,9 +22,11 @@ export async function POST(req: Request) {
       return unauthorized('No token, authorization denied.');
     }
 
-    const body = (await req.json()) as CreateQuestPayload;
+    const body = (await req.json()) as CreateQuestPayload & { recurrences?: number };
+    console.log('[API] Create Quest Body:', body);
     const goal = String(body.goal || '').trim();
     const duration = normalizeDuration(String(body.duration || 'daily'));
+    const recurrences = body.recurrences ? Math.max(1, Number(body.recurrences)) : undefined;
 
     if (!goal) {
       return badRequest('Goal is required.');
@@ -41,6 +43,7 @@ export async function POST(req: Request) {
       progress: 0,
       completed: false,
       completedDate: null,
+      recurrencesLeft: recurrences,
       date: new Date(),
     });
 

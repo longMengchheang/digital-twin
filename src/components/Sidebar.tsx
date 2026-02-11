@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { clamp } from "@/lib/math";
 import {
-  Activity,
-  BrainCircuit,
   Compass,
+  FileText,
+  Lightbulb,
   LogOut,
   MessageSquareText,
   User,
@@ -135,8 +135,8 @@ export default function Sidebar() {
   const navItems: NavItem[] = [
     {
       href: "/dashboard/checkin",
-      label: "Pulse",
-      icon: <Activity className="h-5 w-5" />,
+      label: "Log",
+      icon: <FileText className="h-5 w-5" />,
     },
     {
       href: "/dashboard/quest",
@@ -145,8 +145,8 @@ export default function Sidebar() {
     },
     {
       href: "/dashboard/insight",
-      label: "Mind Map",
-      icon: <BrainCircuit className="h-5 w-5" />,
+      label: "Insight",
+      icon: <Lightbulb className="h-5 w-5" />,
     },
     {
       href: "/dashboard/chat",

@@ -210,7 +210,7 @@ export default function DailyPulsePage() {
             onClick={() => router.push("/dashboard/insight")}
             className="w-full rounded-md bg-[#2A2E3F] py-3 text-sm font-medium text-[#E5E7EB] hover:bg-[#323648] transition-colors"
           >
-            Go to Mind Map
+            Go to Insight
           </button>
         </div>
       </div>
@@ -249,7 +249,7 @@ export default function DailyPulsePage() {
                 View Insights
               </button>
               <button
-                onClick={() => router.push("/dashboard")}
+                onClick={() => setIsAlreadyCompleted(true)}
                 className="w-full rounded-md py-3 text-sm font-medium text-[#9CA3AF] hover:text-white transition-colors"
               >
                 Dismiss
@@ -264,7 +264,7 @@ export default function DailyPulsePage() {
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center p-4 text-[#E5E7EB]">
       <div className="mb-8 text-center animate-fade-in">
-        <span className="text-xs font-bold uppercase tracking-widest text-[#6B7280]">Daily Pulse</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-[#6B7280]">Daily Log</span>
         <h1 className="text-2xl font-bold mt-1">System Check</h1>
       </div>
 

@@ -23,7 +23,11 @@ export async function GET(req: Request) {
     const paramSkip = parseInt(searchParams.get('skip') || '0', 10);
     const skip = isNaN(paramSkip) || paramSkip < 0 ? 0 : paramSkip;
 
-    const quests = await Quest.find({ userId: user.id })
+    const now = new Date();
+    const quests = await Quest.find({ 
+      userId: user.id,
+      date: { $lte: now } // Only show quests that are started or active (past/present)
+    })
       .sort({ date: -1 })
       .skip(skip)
       .limit(limit)
@@ -34,9 +38,12 @@ export async function GET(req: Request) {
         completed: 1,
         date: 1,
         completedDate: 1,
+        recurrencesLeft: 1,
         ratings: { $slice: 1 },
       })
       .lean();
+
+    console.log('[API] Fetched Quests sample:', quests.slice(0, 2).map(q => ({ id: q._id, recurrencesLeft: (q as any).recurrencesLeft })));
 
     return NextResponse.json(
       quests.map((quest) => ({

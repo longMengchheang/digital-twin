@@ -9,6 +9,7 @@ export interface IQuest extends Document {
   completed: boolean;
   date: Date;
   completedDate?: Date;
+  recurrencesLeft?: number;
 }
 
 const questSchema = new mongoose.Schema({
@@ -25,11 +26,17 @@ const questSchema = new mongoose.Schema({
   },
   completed: { type: Boolean, default: false },
   completedDate: { type: Date, default: null },
+  recurrencesLeft: { type: Number }, // Optional: if undefined, infinite
   date: { type: Date, default: Date.now },
 });
 
 questSchema.index({ userId: 1, date: -1 });
 
+if (process.env.NODE_ENV === 'development') {
+  delete mongoose.models.Quest;
+}
+
 const Quest: Model<IQuest> = mongoose.models.Quest || mongoose.model<IQuest>('Quest', questSchema);
+
 
 export default Quest;
