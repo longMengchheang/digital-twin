@@ -1,3 +1,5 @@
+import { clamp } from './math';
+
 export const CHAT_SIGNAL_TYPES = [
   'stress',
   'focus',
@@ -44,10 +46,6 @@ const SIGNAL_ALIASES: SignalAliasMap = {
   breathing: 'breathing',
   breath: 'breathing',
 };
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
-}
 
 export function normalizeSignalType(value: unknown): ChatSignalType | null {
   const key = String(value || '').trim().toLowerCase();
