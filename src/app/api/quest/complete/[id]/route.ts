@@ -4,8 +4,11 @@ import dbConnect from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import { normalizeDuration, QUEST_XP_REWARD } from '@/lib/progression';
 import { adjustUserXP } from '@/lib/user-progress';
+import { updateUserInsight } from '@/lib/insight-engine';
 
 import Quest from '@/lib/models/Quest';
+import QuestLog from '@/lib/models/QuestLog';
+import UserEvent from '@/lib/models/UserEvent';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +43,37 @@ export async function PUT(req: Request, { params }: RouteContext) {
     quest.completedDate = nextCompleted ? new Date() : null;
 
     const reward = QUEST_XP_REWARD[normalizeDuration(quest.duration)] || 0;
+    
+    // Save to QuestLog when completing a quest
+    if (nextCompleted) {
+      await QuestLog.findOneAndUpdate(
+        { userId: user.id, questId: quest._id },
+        {
+          $set: {
+            goal: quest.goal,
+            duration: quest.duration,
+            progress: 100,
+            completedDate: quest.completedDate,
+            createdDate: quest.date,
+            isDeleted: false,
+            deletedDate: null,
+          },
+        },
+        { upsert: true, new: true }
+      );
+
+      // Track quest completion event
+      await UserEvent.create({
+        userId: user._id,
+        type: 'quest_completed',
+        metadata: {
+          category: quest.duration,
+        },
+      });
+
+      // Update insights asynchronously
+      updateUserInsight(user._id.toString()).catch(console.error);
+    }
     
     // Recurring Logic
     if (nextCompleted) {
@@ -84,31 +118,67 @@ export async function PUT(req: Request, { params }: RouteContext) {
         completed: false
       });
 
+      let shouldDeleteOriginal = false;
+      let nextRecurrencesLeft = quest.recurrencesLeft;
+      
+      console.log('[COMPLETE] recurrencesLeft:', quest.recurrencesLeft, '| nextRecurrencesLeft:', nextRecurrencesLeft);
+
       if (!existingFutureQuest) {
         // Handle recurrences
-        let nextRecurrencesLeft = quest.recurrencesLeft;
         let shouldCreate = true;
 
         if (typeof nextRecurrencesLeft === 'number') {
            if (nextRecurrencesLeft > 0) {
              nextRecurrencesLeft -= 1;
+             console.log('[COMPLETE] After decrement, nextRecurrencesLeft:', nextRecurrencesLeft);
+             // If this was the last recurrence, mark for deletion
+             if (nextRecurrencesLeft === 0) {
+               shouldDeleteOriginal = true;
+               shouldCreate = false; // FIX: Don't create new quest when recurrences exhausted
+               console.log('[COMPLETE] Last recurrence - shouldDeleteOriginal:', shouldDeleteOriginal, 'shouldCreate:', shouldCreate);
+             }
            } else {
              shouldCreate = false;
+             shouldDeleteOriginal = true; // No more recurrences, delete original
            }
         }
 
         if (shouldCreate) {
-          await Quest.create({
-            userId: user.id,
-            goal: quest.goal,
-            duration: quest.duration,
-            date: nextDate,
-            progress: 0,
-            completed: false,
-            ratings: [],
-            recurrencesLeft: nextRecurrencesLeft
-          });
-        }
+           await Quest.create({
+             userId: user.id,
+             goal: quest.goal,
+             duration: quest.duration,
+             date: nextDate,
+             progress: 0,
+             completed: false,
+             ratings: [],
+             recurrencesLeft: nextRecurrencesLeft
+           });
+           
+           // Only delete the original quest if recurrencesLeft === 0 (explicitly zero)
+           // undefined/null means infinite recurrence - keep the original quest
+           // Note: shouldDeleteOriginal is already set to true above when nextRecurrencesLeft === 0
+         }
+       } else {
+         // Future quest already exists - only delete if recurrencesLeft === 0
+         // Don't delete infinite recurrence quests (recurrencesLeft === undefined/null)
+         if (typeof quest.recurrencesLeft === 'number' && quest.recurrencesLeft === 0) {
+           shouldDeleteOriginal = true;
+         }
+       }
+
+      // Delete the original quest if needed
+      if (shouldDeleteOriginal) {
+        await Quest.findByIdAndDelete(quest._id);
+        
+        const progression = await adjustUserXP(user.id, reward);
+        
+        return NextResponse.json({
+          msg: 'Quest completed and archived.',
+          quest: null, // Quest is deleted
+          progression,
+          deleted: true,
+        });
       }
     }
 

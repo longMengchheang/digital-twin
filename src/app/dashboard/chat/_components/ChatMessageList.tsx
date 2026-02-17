@@ -24,13 +24,13 @@ export function ChatMessageList({
   messagesEndRef,
 }: ChatMessageListProps) {
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-6 scroll-smooth bg-[#151823]">
+    <div className="flex-1 overflow-y-auto px-4 py-6 scroll-smooth bg-bg-panel">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         {hasMoreMessages && !bootstrapping && (
           <button
             onClick={() => void loadMoreMessages()}
             disabled={loadingMore}
-            className="mx-auto text-xs font-medium text-[#6B7280] hover:text-[#E5E7EB] hover:underline"
+            className="mx-auto text-xs font-medium text-text-muted hover:text-text-primary hover:underline"
           >
             {loadingMore ? "Loading..." : "Load Older Messages"}
           </button>
@@ -38,19 +38,19 @@ export function ChatMessageList({
 
         {bootstrapping ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 py-20 opacity-50">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#8B5CF6]/30 border-t-[#8B5CF6]" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-primary/30 border-t-accent-primary" />
           </div>
         ) : messages.length <= 1 && !activeChatId ? (
           // Empty state greeting
           <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
-            <div className="mb-4 rounded-full bg-[#1C1F2B] p-4 text-[#8B5CF6]">
+            <div className="mb-4 rounded-full bg-bg-card p-4 text-accent-primary">
               <Sparkles className="h-8 w-8" />
             </div>
-            <h2 className="text-lg font-bold text-[#E5E7EB]">
+            <h2 className="text-lg font-bold text-text-primary">
               Welcome to the Link.
             </h2>
-            <p className="mt-1 text-sm text-[#9CA3AF] max-w-xs">
-              I am your digital twin. I'm ready to sync.
+            <p className="mt-1 text-sm text-text-secondary max-w-xs">
+              I am your digital twin. I&apos;m ready to sync.
             </p>
           </div>
         ) : (
@@ -63,14 +63,14 @@ export function ChatMessageList({
               ].join(" ")}
             >
               <div
-                className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
-                  message.sender === "ai" ? "bg-[#8B5CF6]" : "bg-[#2A2E3F]"
+                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                  message.sender === "ai" ? "bg-accent-primary" : "bg-border"
                 }`}
               >
                 {message.sender === "ai" ? (
                   <Sparkles className="h-4 w-4 text-white" />
                 ) : (
-                  <User className="h-4 w-4 text-[#9CA3AF]" />
+                  <User className="h-4 w-4 text-text-secondary" />
                 )}
               </div>
 
@@ -80,10 +80,10 @@ export function ChatMessageList({
                 }`}
               >
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-sm font-bold text-[#E5E7EB]">
+                  <span className="text-sm font-bold text-text-primary">
                     {message.sender === "ai" ? "Digital Twin" : "You"}
                   </span>
-                  <span className="text-[10px] text-[#6B7280]">
+                  <span className="text-[10px] text-text-muted">
                     {new Date(message.timestamp).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -100,20 +100,20 @@ export function ChatMessageList({
 
         {isLoading && (
           <div className="flex gap-4 animate-fade-in">
-            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#8B5CF6]">
+            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-accent-primary">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <div>
               <div className="flex items-baseline gap-2 mb-1">
-                <span className="text-sm font-bold text-[#E5E7EB]">
+                <span className="text-sm font-bold text-text-primary">
                   Digital Twin
                 </span>
-                <span className="text-[10px] text-[#6B7280]">typing...</span>
+                <span className="text-[10px] text-text-muted">typing...</span>
               </div>
               <div className="flex gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8B5CF6] animate-pulse" />
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8B5CF6] animate-pulse delay-75" />
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8B5CF6] animate-pulse delay-150" />
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-primary animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-primary animate-pulse delay-75" />
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-primary animate-pulse delay-150" />
               </div>
             </div>
           </div>

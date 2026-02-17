@@ -3,9 +3,12 @@ import { NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { CHAT_SIGNAL_TYPES, parseSignalResponseText } from '@/lib/chat-signals';
 import dbConnect from '@/lib/db';
+import { updateUserInsight } from '@/lib/insight-engine';
 import ChatConversation from '@/lib/models/ChatConversation';
 import ChatMessage from '@/lib/models/ChatMessage';
 import ChatSignal from '@/lib/models/ChatSignal';
+import UserInsightState from '@/lib/models/UserInsightState';
+import UserEvent from '@/lib/models/UserEvent';
 import { badRequest, unauthorized, notFound, serverError, errorResponse } from '@/lib/api-response';
 
 export const dynamic = 'force-dynamic';
@@ -117,6 +120,44 @@ function isLikelyIncompleteReply(text: string, finishReason?: string): boolean {
   return false;
 }
 
+/**
+ * Extract topic keywords from a message.
+ * Returns the first 5 meaningful words as a simple topic representation.
+ */
+function extractTopic(message: string): string {
+  const normalized = String(message || '').trim();
+  if (!normalized) {
+    return '';
+  }
+
+  // Remove common stop words
+  const stopWords = new Set([
+    'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+    'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+    'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare',
+    'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her',
+    'us', 'them', 'my', 'your', 'his', 'her', 'its', 'our', 'their',
+    'this', 'that', 'these', 'those', 'what', 'which', 'who', 'whom',
+    'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both',
+    'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not',
+    'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'but',
+    'and', 'or', 'if', 'because', 'as', 'until', 'while', 'of', 'at',
+    'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through',
+    'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up',
+    'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further',
+    'then', 'once', 'here', 'there', 'all', 'any', 'both', 'each',
+  ]);
+
+  const words = normalized
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word.length > 2 && !stopWords.has(word))
+    .slice(0, 5);
+
+  return words.join(' ');
+}
+
 async function requestGeminiContent(model: string, payload: unknown): Promise<{ text: string; finishReason?: string }> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -157,7 +198,14 @@ async function requestGeminiContent(model: string, payload: unknown): Promise<{ 
   };
 }
 
-function buildCompanionPayload(userMessage: string, history: ConversationEntry[]) {
+interface InsightData {
+  topInterest: string;
+  currentTrend: string;
+  entertainmentRatio: number;
+  lastReflection: string;
+}
+
+function buildCompanionPayload(userMessage: string, history: ConversationEntry[], insight?: InsightData | null) {
   const historyContents: GeminiContent[] = history
     .filter((message) => message.content.trim())
     .slice(-14)
@@ -166,20 +214,41 @@ function buildCompanionPayload(userMessage: string, history: ConversationEntry[]
       parts: [{ text: message.content }],
     }));
 
+  // Build system prompt with optional insight section
+  const systemPromptParts: string[] = [
+    'You are the user\'s digital twin.',
+    'You observe their behavior and give supportive, intelligent feedback.',
+  ];
+
+  // Add insight section if available
+  if (insight) {
+    const entertainmentPercent = Math.round(insight.entertainmentRatio * 100);
+    systemPromptParts.push('');
+    systemPromptParts.push('Current user insight:');
+    systemPromptParts.push(`- Top interest: ${insight.topInterest || 'Not yet identified'}`);
+    systemPromptParts.push(`- Productivity trend: ${insight.currentTrend || 'stable'}`);
+    systemPromptParts.push(`- Entertainment ratio: ${entertainmentPercent}%`);
+    systemPromptParts.push(`- Recent reflection: ${insight.lastReflection || 'None yet'}`);
+    systemPromptParts.push('');
+    systemPromptParts.push('Respond naturally. Occasionally reference these insights, but do not sound like a report or dashboard.');
+  } else {
+    // Default prompt without insight
+    systemPromptParts.push('Be warm, clear, and action-oriented.');
+    systemPromptParts.push('Help with focus, routines, stress regulation, and daily planning.');
+  }
+
+  systemPromptParts.push('');
+  systemPromptParts.push('Use concrete steps, short checklists, and reflective follow-up questions when useful.');
+  systemPromptParts.push('Do not fabricate personal history or claim capabilities you do not have.');
+  systemPromptParts.push('Avoid medical diagnosis and legal or financial advice.');
+  systemPromptParts.push('If the user sounds in crisis or unsafe, encourage contacting trusted support and local emergency services.');
+  systemPromptParts.push('Keep responses concise: 2-5 short sentences unless the user explicitly asks for detail.');
+
   return {
     systemInstruction: {
       parts: [
         {
-          text: [
-            'You are the Digital Twin Companion, a calm and practical assistant.',
-            'Be warm, clear, and action-oriented.',
-            'Help with focus, routines, stress regulation, and daily planning.',
-            'Use concrete steps, short checklists, and reflective follow-up questions when useful.',
-            'Do not fabricate personal history or claim capabilities you do not have.',
-            'Avoid medical diagnosis and legal or financial advice.',
-            'If the user sounds in crisis or unsafe, encourage contacting trusted support and local emergency services.',
-            'Keep responses concise: 2-5 short sentences unless the user explicitly asks for detail.',
-          ].join(' '),
+          text: systemPromptParts.join(' '),
         },
       ],
     },
@@ -415,9 +484,20 @@ export async function POST(req: Request) {
         content: String(entry.content || ''),
       }));
 
+    // Fetch user's insight state for personalized context
+    const insightState = await UserInsightState.findOne({ userId: user._id }).lean();
+    const insightData: InsightData | null = insightState
+      ? {
+          topInterest: insightState.topInterest || '',
+          currentTrend: insightState.currentTrend || 'stable',
+          entertainmentRatio: insightState.entertainmentRatio || 0,
+          lastReflection: insightState.lastReflection || '',
+        }
+      : null;
+
     let companionResult: GeminiGenerationResult;
     try {
-      companionResult = await tryGeminiWithFallback(buildCompanionPayload(message, history));
+      companionResult = await tryGeminiWithFallback(buildCompanionPayload(message, history, insightData));
       companionResult = await ensureReplyQuality(message, companionResult);
     } catch (llmError) {
       console.error('Gemini generation failed:', llmError);
@@ -468,6 +548,18 @@ export async function POST(req: Request) {
         },
       ),
     ]);
+
+    // Track chat message event (non-blocking)
+    UserEvent.create({
+      userId: user._id,
+      type: 'chat_message',
+      metadata: {
+        topic: extractTopic(message),
+      },
+    }).catch((err) => console.error('Failed to create chat event:', err));
+
+    // Update insights asynchronously
+    updateUserInsight(user._id.toString()).catch(console.error);
 
     const userMessage = {
       role: 'user' as const,

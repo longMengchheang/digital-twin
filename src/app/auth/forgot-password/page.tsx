@@ -41,14 +41,14 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0F111A] px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-2xl border border-[#2A2E3F] bg-[#1C1F2B] p-8 shadow-[0_0_50px_-10px_rgba(139,92,246,0.1)]">
+    <div className="flex min-h-screen items-center justify-center bg-bg-base px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-border bg-bg-card p-8 shadow-[0_0_50px_-10px_rgba(139,92,246,0.1)]">
         <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#8B5CF6]/10 text-[#8B5CF6] shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-accent-primary/10 text-accent-primary shadow-[0_0_15px_rgba(139,92,246,0.1)]">
             <Mail className="h-6 w-6" />
           </div>
           <h2 className="mt-6 text-2xl font-bold tracking-tight text-white">Account Recovery</h2>
-          <p className="mt-2 text-sm text-[#9CA3AF]">
+          <p className="mt-2 text-sm text-text-secondary">
             Enter your biological identifier (email) to receive a reset link.
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input-discord w-full bg-[#151823] border-[#2A2E3F] focus:border-[#8B5CF6] transition-colors"
+              className="input-discord w-full bg-bg-panel border-border focus:border-accent-primary transition-colors"
               placeholder="user@system.com"
             />
           </div>
@@ -96,7 +96,7 @@ export default function ForgotPasswordPage() {
         </form>
 
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center text-sm font-medium text-[#8B5CF6] hover:text-[#A78BFA] transition-colors">
+          <Link href="/" className="inline-flex items-center text-sm font-medium text-accent-primary hover:text-accent-hover transition-colors">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Return to Access Terminal
           </Link>

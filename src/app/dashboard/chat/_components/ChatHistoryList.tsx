@@ -15,7 +15,7 @@ export function ChatHistoryList({
 }: ChatHistoryListProps) {
   if (!historyChats.length) {
     return (
-      <p className="py-2 text-center text-xs text-[#6B7280]">No history yet.</p>
+      <p className="py-2 text-center text-xs text-text-muted">No history yet.</p>
     );
   }
 
@@ -31,8 +31,8 @@ export function ChatHistoryList({
           className={[
             "w-full rounded px-2 py-1.5 text-left transition-all",
             chat.id === activeChatId
-              ? "bg-[#2A2E3F] text-[#E5E7EB]"
-              : "hover:bg-[#2A2E3F]/50 text-[#9CA3AF]",
+              ? "bg-border text-text-primary"
+              : "hover:bg-border/50 text-text-secondary",
           ].join(" ")}
           disabled={historyLoadingId === chat.id}
         >

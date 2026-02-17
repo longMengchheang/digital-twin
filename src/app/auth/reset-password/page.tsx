@@ -64,14 +64,14 @@ function ResetPasswordForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0F111A] px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-2xl border border-[#2A2E3F] bg-[#1C1F2B] p-8 shadow-[0_0_50px_-10px_rgba(139,92,246,0.1)]">
+    <div className="flex min-h-screen items-center justify-center bg-bg-base px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-border bg-bg-card p-8 shadow-[0_0_50px_-10px_rgba(139,92,246,0.1)]">
         <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#8B5CF6]/10 text-[#8B5CF6] shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-accent-primary/10 text-accent-primary shadow-[0_0_15px_rgba(139,92,246,0.1)]">
             <Key className="h-6 w-6" />
           </div>
           <h2 className="mt-6 text-2xl font-bold tracking-tight text-white">Reset Credentials</h2>
-          <p className="mt-2 text-sm text-[#9CA3AF]">
+          <p className="mt-2 text-sm text-text-secondary">
             Enter the 6-digit code sent to <strong className="text-white">{emailParam}</strong> and your new password.
           </p>
         </div>
@@ -79,7 +79,7 @@ function ResetPasswordForm() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="otp" className="block text-xs font-bold uppercase tracking-wide text-[#6B7280] mb-1">
+              <label htmlFor="otp" className="block text-xs font-bold uppercase tracking-wide text-text-muted mb-1">
                 Verification Code
               </label>
               <input
@@ -91,13 +91,13 @@ function ResetPasswordForm() {
                 required
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                className="input-discord w-full bg-[#151823] border-[#2A2E3F] focus:border-[#8B5CF6] text-center text-lg tracking-[0.5em] transition-colors"
+                className="input-discord w-full bg-bg-panel border-border focus:border-accent-primary text-center text-lg tracking-[0.5em] transition-colors"
                 placeholder="000000"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wide text-[#6B7280] mb-1">
+              <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wide text-text-muted mb-1">
                 New Password
               </label>
               <input
@@ -108,13 +108,13 @@ function ResetPasswordForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="input-discord w-full bg-[#151823] border-[#2A2E3F] focus:border-[#8B5CF6] transition-colors"
+                className="input-discord w-full bg-bg-panel border-border focus:border-accent-primary transition-colors"
                 placeholder="New password"
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-xs font-bold uppercase tracking-wide text-[#6B7280] mb-1">
+              <label htmlFor="confirmPassword" className="block text-xs font-bold uppercase tracking-wide text-text-muted mb-1">
                 Confirm Password
               </label>
               <input
@@ -125,7 +125,7 @@ function ResetPasswordForm() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="input-discord w-full bg-[#151823] border-[#2A2E3F] focus:border-[#8B5CF6] transition-colors"
+                className="input-discord w-full bg-bg-panel border-border focus:border-accent-primary transition-colors"
                 placeholder="Confirm new password"
               />
             </div>
@@ -155,7 +155,7 @@ function ResetPasswordForm() {
           </button>
         </form>
          <div className="text-center">
-            <Link href="/auth/forgot-password" className="text-sm font-medium text-[#8B5CF6] hover:text-[#A78BFA] transition-colors">
+            <Link href="/auth/forgot-password" className="text-sm font-medium text-accent-primary hover:text-accent-hover transition-colors">
               Resend Code
             </Link>
           </div>
@@ -166,7 +166,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#0F111A] text-[#8B5CF6]">Loading System...</div>}>
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-bg-base text-accent-primary">Loading System...</div>}>
       <ResetPasswordForm />
     </Suspense>
   );

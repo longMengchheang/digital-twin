@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { ArrowRight, FileText, Lightbulb, MessageCircle, Target, User, Zap, Activity } from "lucide-react";
+import { Activity, ArrowRight, Network, ScrollText, Sparkles, Swords } from "lucide-react";
 import { validatePassword } from "@/lib/validation";
 
 type FlashType = "success" | "error";
@@ -13,6 +13,20 @@ type AuthMode = "signin" | "signup";
 interface FlashState {
   type: FlashType;
   text: string;
+}
+
+function GeminiMark({ className = "text-base" }: { className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={[
+        "inline-flex items-center justify-center font-bold leading-none",
+        className,
+      ].join(" ")}
+    >
+      ?
+    </span>
+  );
 }
 
 function resolveMode(value: string | null): AuthMode {
@@ -50,7 +64,7 @@ export default function AuthPage() {
       })
       .then(() => {
         if (active) {
-          router.replace("/dashboard/checkin");
+          router.replace("/dashboard/insight");
         }
       })
       .catch(() => {
@@ -125,13 +139,13 @@ export default function AuthPage() {
       localStorage.setItem("token", token);
 
       if (isLogin) {
-        router.replace("/dashboard/checkin");
+        router.replace("/dashboard/insight");
         return;
       }
 
       setFlash({ type: "success", text: "Unit Initialized. Loading system..." });
       redirectTimerRef.current = setTimeout(() => {
-        router.replace("/dashboard/checkin");
+        router.replace("/dashboard/insight");
       }, 700);
     } catch (error) {
       const message =
@@ -147,45 +161,45 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 md:px-8 md:py-10 bg-[#0F111A]">
-      <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-[1.2rem] border border-[#2A2E3F] bg-[#1C1F2B] shadow-[0_0_50px_-10px_rgba(139,92,246,0.15)] md:grid-cols-[1.1fr_1fr]">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 md:px-8 md:py-10 bg-bg-base">
+      <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-[1.2rem] border border-border bg-bg-card shadow-[0_0_50px_-10px_rgba(139,92,246,0.15)] md:grid-cols-[1.1fr_1fr]">
         
         {/* Left Panel: Branding / System Intro */}
-        <aside className="relative flex flex-col justify-between border-b border-[#2A2E3F] bg-gradient-to-br from-[#14182E] to-[#0F111A] p-8 md:border-b-0 md:border-r md:p-12">
+        <aside className="relative flex flex-col justify-between border-b border-border bg-linear-to-br from-[#14182E] to-bg-base p-8 md:border-b-0 md:border-r md:p-12">
           {/* Decorative Elements */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.1),transparent_50%)]" />
           
           <div className="relative z-10">
             <div className="mb-10 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#8B5CF6] text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]">
-                <Zap className="h-5 w-5 fill-current" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]">
+                <GeminiMark className="text-xl" />
               </div>
               <div>
                 <p className="text-sm font-bold text-white tracking-wide">Digital Mind</p>
-                <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF]">System Version 2.0</p>
+                <p className="text-[10px] uppercase tracking-wider text-text-secondary">System Version 2.0</p>
               </div>
             </div>
 
             <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl leading-tight">
-              Initialize your <span className="text-[#8B5CF6]">digital twin</span>.
+              Initialize your <span className="text-accent-primary">digital twin</span>.
             </h1>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-[#9CA3AF]">
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-text-secondary">
               Connect to your personal system. Track quests, monitor stability, and evolve your digital identity.
             </p>
           </div>
 
           <div className="relative z-10 mt-12 space-y-3">
             {[
-              { label: "Daily Log", icon: <FileText className="h-4 w-4" /> },
-              { label: "Quest Log", icon: <Target className="h-4 w-4" /> },
-              { label: "Insight", icon: <Lightbulb className="h-4 w-4" /> },
-              { label: "Companion", icon: <MessageCircle className="h-4 w-4" /> },
+              { label: "Log", icon: <ScrollText className="h-4 w-4" /> },
+              { label: "Quest", icon: <Swords className="h-4 w-4" /> },
+              { label: "Graph", icon: <Network className="h-4 w-4" /> },
+              { label: "Companion", icon: <Sparkles className="h-4 w-4" /> },
             ].map((item) => (
               <div
                 key={item.label}
-                className="group flex items-center gap-3 rounded-lg border border-[#2A2E3F] bg-[#151823]/50 px-4 py-3 text-sm text-[#E5E7EB] transition-all hover:bg-[#1C1F2B] hover:border-[#8B5CF6]/50"
+                className="group flex items-center gap-3 rounded-lg border border-border bg-bg-panel/50 px-4 py-3 text-sm text-text-primary transition-all hover:bg-bg-card hover:border-accent-primary/50"
               >
-                <span className="text-[#8B5CF6] transition-transform group-hover:scale-110">{item.icon}</span>
+                <span className="text-accent-primary transition-transform group-hover:scale-110">{item.icon}</span>
                 <span className="font-medium tracking-wide">{item.label}</span>
               </div>
             ))}
@@ -193,13 +207,13 @@ export default function AuthPage() {
         </aside>
 
         {/* Right Panel: Auth Form */}
-        <section className="relative flex flex-col justify-center p-8 md:p-12 bg-[#1C1F2B]">
-          <div className="mb-8 flex rounded-lg border border-[#2A2E3F] bg-[#151823] p-1 text-xs font-bold uppercase tracking-wide">
+        <section className="relative flex flex-col justify-center p-8 md:p-12 bg-bg-card">
+          <div className="mb-8 flex rounded-lg border border-border bg-bg-panel p-1 text-xs font-bold uppercase tracking-wide">
             <button
               type="button"
               className={[
                 "w-1/2 rounded px-3 py-2 transition-all duration-200",
-                isLogin ? "bg-[#2A2E3F] text-white shadow-sm" : "text-[#6B7280] hover:text-[#9CA3AF]",
+                isLogin ? "bg-border text-white shadow-sm" : "text-text-muted hover:text-text-secondary",
               ].join(" ")}
               onClick={() => setAuthMode("signin")}
             >
@@ -209,7 +223,7 @@ export default function AuthPage() {
               type="button"
               className={[
                 "w-1/2 rounded px-3 py-2 transition-all duration-200",
-                !isLogin ? "bg-[#2A2E3F] text-white shadow-sm" : "text-[#6B7280] hover:text-[#9CA3AF]",
+                !isLogin ? "bg-border text-white shadow-sm" : "text-text-muted hover:text-text-secondary",
               ].join(" ")}
               onClick={() => setAuthMode("signup")}
             >
@@ -218,14 +232,14 @@ export default function AuthPage() {
           </div>
 
           <h2 className="text-2xl font-bold tracking-tight text-white mb-2">{pageTitle}</h2>
-          <p className="text-sm text-[#9CA3AF]">Explore your thoughts.</p>
-          <p className="text-sm text-[#9CA3AF] mb-8">
+          <p className="text-sm text-text-secondary">Explore your thoughts.</p>
+          <p className="text-sm text-text-secondary mb-8">
             {isLogin ? "Enter your credentials to access the system." : "Create a new biological profile."}
           </p>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wide text-[#6B7280]" htmlFor="email">
+              <label className="text-xs font-bold uppercase tracking-wide text-text-muted" htmlFor="email">
                 Email Address
               </label>
               <input
@@ -235,13 +249,13 @@ export default function AuthPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="user@system.com"
                 autoComplete="email"
-                className="input-discord w-full bg-[#151823] border-[#2A2E3F] focus:border-[#8B5CF6] transition-colors"
+                className="input-discord w-full bg-bg-panel border-border focus:border-accent-primary transition-colors"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wide text-[#6B7280]" htmlFor="password">
+              <label className="text-xs font-bold uppercase tracking-wide text-text-muted" htmlFor="password">
                 Password
               </label>
               <input
@@ -251,14 +265,14 @@ export default function AuthPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
                 autoComplete={isLogin ? "current-password" : "new-password"}
-                className="input-discord w-full bg-[#151823] border-[#2A2E3F] focus:border-[#8B5CF6] transition-colors"
+                className="input-discord w-full bg-bg-panel border-border focus:border-accent-primary transition-colors"
                 required
               />
             </div>
             
             {isLogin && (
               <div className="flex justify-end">
-                <a href="/auth/forgot-password" className="text-xs font-medium text-[#8B5CF6] hover:text-[#A78BFA] transition-colors">
+                <a href="/auth/forgot-password" className="text-xs font-medium text-accent-primary hover:text-accent-hover transition-colors">
                   Forgot password?
                 </a>
               </div>

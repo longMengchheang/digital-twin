@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import confetti from "canvas-confetti";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BarChart2, Check, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 interface ResponseEntry {
   question: string;
@@ -27,33 +27,33 @@ interface MoodOption {
 const moodOptions: MoodOption[] = [
   {
     value: 1,
-    emoji: "😞",
+    emoji: "??",
     label: "Low",
-    color: "bg-[#F87171]",
+    color: "bg-status-error",
   },
   {
     value: 2,
-    emoji: "😐",
+    emoji: "??",
     label: "Neutral",
-    color: "bg-[#6B7280]", // Muted gray
+    color: "bg-text-muted", // Muted gray
   },
   {
     value: 3,
-    emoji: "🙂",
+    emoji: "??",
     label: "Good",
-    color: "bg-[#34D399]", // Teal
+    color: "bg-status-success", // Teal
   },
   {
     value: 4,
-    emoji: "😄",
+    emoji: "??",
     label: "Great",
     color: "bg-[#22D3EE]", // Cyan
   },
   {
     value: 5,
-    emoji: "🤩",
+    emoji: "??",
     label: "Excellent",
-    color: "bg-[#8B5CF6]", // Purple
+    color: "bg-accent-primary", // Purple
   },
 ];
 
@@ -65,29 +65,25 @@ const fallbackQuestions = [
   "How positive do you feel about tomorrow?",
 ];
 
+const INSIGHT_PATH = "/dashboard/insight";
+
 export default function DailyPulsePage() {
   const router = useRouter();
   const [questions, setQuestions] = useState<string[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0);
   const [responses, setResponses] = useState<ResponseEntry[]>([]);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [isAlreadyCompleted, setIsAlreadyCompleted] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<CheckInResult | null>(null);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    void fetchQuestions();
-  }, []);
 
   const completionPercent = useMemo(() => {
     if (!questions.length) return 0;
     return Math.round(((currentQuestionIndex + 1) / questions.length) * 100);
   }, [currentQuestionIndex, questions.length]);
 
-  const fetchQuestions = async () => {
+  const fetchQuestions = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/");
@@ -103,14 +99,20 @@ export default function DailyPulsePage() {
       setError("");
     } catch (requestError) {
       if (axios.isAxiosError(requestError) && requestError.response?.status === 400) {
-        setIsAlreadyCompleted(true);
+        setRedirecting(true);
+        router.replace(INSIGHT_PATH);
+        return;
       } else {
         setQuestions(fallbackQuestions);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    void fetchQuestions();
+  }, [fetchQuestions]);
 
   const submitCheckIn = async (entries: ResponseEntry[]) => {
     setSubmitting(true);
@@ -119,6 +121,7 @@ export default function DailyPulsePage() {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/");
+      setSubmitting(false);
       return;
     }
 
@@ -144,9 +147,6 @@ export default function DailyPulsePage() {
               percentage: computedPercentage,
             };
 
-      setResult(finalResult);
-      setIsCompleted(true);
-
       if (finalResult.percentage >= 80) {
         confetti({
           particleCount: 120,
@@ -155,6 +155,10 @@ export default function DailyPulsePage() {
           colors: ["#8B5CF6", "#34D399", "#FCD34D"],
         });
       }
+
+      setRedirecting(true);
+      router.replace(INSIGHT_PATH);
+      return;
     } catch {
       setError("Failed to submit daily pulse. Please try again.");
     } finally {
@@ -183,78 +187,12 @@ export default function DailyPulsePage() {
     await submitCheckIn(nextResponses);
   };
 
-  if (loading) {
+  if (loading || redirecting) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-[#9CA3AF]">
-          <Loader2 className="h-8 w-8 animate-spin text-[#8B5CF6]" />
-          <p className="text-sm font-medium">Loading system...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Already Completed View
-  if (isAlreadyCompleted) {
-    return (
-      <div className="flex min-h-[80vh] items-center justify-center p-4">
-        <div className="card-discord w-full max-w-md p-8 text-center bg-[#1C1F2B]">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#34D399]/10 text-[#34D399] border border-[#34D399]/20">
-            <Check className="h-8 w-8" />
-          </div>
-          <h1 className="mb-2 text-xl font-bold text-[#E5E7EB]">Check-in Complete</h1>
-          <p className="mb-8 text-[#9CA3AF] text-sm">
-            Data has been logged for today.
-          </p>
-          <button
-            onClick={() => router.push("/dashboard/insight")}
-            className="w-full rounded-md bg-[#2A2E3F] py-3 text-sm font-medium text-[#E5E7EB] hover:bg-[#323648] transition-colors"
-          >
-            Go to Insight
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Success View
-  if (isCompleted && result) {
-    return (
-      <div className="flex min-h-[80vh] items-center justify-center p-4">
-        <div className="card-discord w-full max-w-lg p-8 text-center bg-[#1C1F2B]">
-          
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#8B5CF6]/10 text-[#8B5CF6] border-2 border-[#8B5CF6]/20 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-              <Check className="h-10 w-10" />
-            </div>
-
-            <h1 className="mb-2 text-2xl font-bold text-[#E5E7EB]">System Updated</h1>
-            <p className="mb-8 text-[#9CA3AF]">Your metrics have been recorded.</p>
-
-            <div className="mb-8 flex justify-center gap-4">
-               <div className="rounded bg-[#0F111A] px-5 py-3 border border-[#2A2E3F]">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B7280]">Score</p>
-                  <p className="text-xl font-bold text-white">{result.percentage}%</p>
-               </div>
-               <div className="rounded bg-[#0F111A] px-5 py-3 border border-[#2A2E3F]">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B7280]">Reward</p>
-                  <p className="text-xl font-bold text-[#34D399]">+{result.percentage} XP</p>
-               </div>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <button
-                 onClick={() => router.push("/dashboard/insight")}
-                 className="btn-discord-primary w-full"
-              >
-                View Insights
-              </button>
-              <button
-                onClick={() => setIsAlreadyCompleted(true)}
-                className="w-full rounded-md py-3 text-sm font-medium text-[#9CA3AF] hover:text-white transition-colors"
-              >
-                Dismiss
-              </button>
-            </div>
+        <div className="flex flex-col items-center gap-3 text-text-secondary">
+          <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+          <p className="text-sm font-medium">{redirecting ? "Redirecting to insight..." : "Loading system..."}</p>
         </div>
       </div>
     );
@@ -262,28 +200,28 @@ export default function DailyPulsePage() {
 
   // Question Flow
   return (
-    <div className="flex min-h-[80vh] flex-col items-center justify-center p-4 text-[#E5E7EB]">
+    <div className="flex min-h-[80vh] flex-col items-center justify-center p-4 text-text-primary">
       <div className="mb-8 text-center animate-fade-in">
-        <span className="text-xs font-bold uppercase tracking-widest text-[#6B7280]">Daily Log</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-text-muted">Daily Log</span>
         <h1 className="text-2xl font-bold mt-1">System Check</h1>
       </div>
 
-      <div className="card-discord w-full max-w-2xl p-8 bg-[#1C1F2B] animate-fade-in">
+      <div className="card-discord w-full max-w-2xl p-8 bg-bg-card animate-fade-in">
         {error && (
-            <div className="mb-6 rounded border border-[#F87171]/20 bg-[#F87171]/10 px-4 py-3 text-sm text-[#F87171]">
+            <div className="mb-6 rounded border border-status-error/20 bg-status-error/10 px-4 py-3 text-sm text-status-error">
                 {error}
             </div>
         )}
 
         {/* Progress */}
         <div className="mb-8 space-y-2">
-          <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-[#6B7280]">
+          <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-text-muted">
             <span>Query {currentQuestionIndex + 1} / {questions.length}</span>
             <span>{completionPercent}%</span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#0F111A]">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-bg-base">
             <div 
-                className="h-full rounded-full bg-[#8B5CF6] transition-all duration-300 ease-out"
+                className="h-full rounded-full bg-accent-primary transition-all duration-300 ease-out"
                 style={{ width: `${completionPercent}%` }}
             />
           </div>
@@ -307,15 +245,15 @@ export default function DailyPulsePage() {
                         onClick={() => setSelectedRating(mood.value)}
                         className={`group relative flex flex-col items-center justify-center gap-2 rounded-lg p-3 transition-all duration-200 border ${
                             isSelected 
-                                ? `bg-[#2A2E3F] border-[#8B5CF6] shadow-[0_0_10px_rgba(139,92,246,0.2)]` 
-                                : "bg-[#151823] border-[#2A2E3F] hover:bg-[#2A2E3F] hover:border-[#9CA3AF]"
+                                ? `bg-border border-accent-primary shadow-[0_0_10px_rgba(139,92,246,0.2)]` 
+                                : "bg-bg-panel border-border hover:bg-border hover:border-text-secondary"
                         }`}
                     >
                         <span className="text-3xl transition-transform duration-200 group-hover:scale-110">
                             {mood.emoji}
                         </span>
                         {isSelected && (
-                             <span className="text-[10px] font-bold uppercase tracking-wide text-[#E5E7EB]">
+                             <span className="text-[10px] font-bold uppercase tracking-wide text-text-primary">
                                 {mood.label}
                              </span>
                         )}

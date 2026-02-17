@@ -27,18 +27,18 @@ export function ChatInput({
   };
 
   return (
-    <div className="bg-[#151823] px-4 pb-5 pt-2">
+    <div className="bg-bg-panel px-4 pb-5 pt-2">
       <div className="mx-auto w-full max-w-3xl">
-        <div className="relative rounded-lg bg-[#1C1F2B]">
+        <div className="relative rounded-lg bg-bg-card">
           {/* Suggestion Chips */}
           {messagesCount < 3 && (
-            <div className="flex gap-2 p-2 overflow-x-auto pb-0 border-b border-[#2A2E3F]/50">
+            <div className="flex gap-2 p-2 overflow-x-auto pb-0 border-b border-border/50">
               {quickPrompts.map((prompt) => (
                 <button
                   key={prompt}
                   type="button"
                   onClick={() => setInput(prompt)}
-                  className="whitespace-nowrap rounded px-2 py-0.5 text-xs font-medium text-[#8B5CF6] hover:bg-[#8B5CF6]/10 hover:underline transition-colors"
+                  className="whitespace-nowrap rounded px-2 py-0.5 text-xs font-medium text-accent-primary hover:bg-accent-primary/10 hover:underline transition-colors"
                 >
                   {prompt}
                 </button>
@@ -52,7 +52,7 @@ export function ChatInput({
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Message #companion-chat"
-              className="min-h-[44px] max-h-[140px] flex-1 resize-none bg-transparent px-4 py-3 text-[0.93rem] text-[#E5E7EB] placeholder:text-[#6B7280] outline-none"
+              className="min-h-11 max-h-35 flex-1 resize-none bg-transparent px-4 py-3 text-[0.93rem] text-text-primary placeholder:text-text-muted outline-none"
               rows={1}
             />
 
@@ -63,7 +63,7 @@ export function ChatInput({
                   void handleSend();
                 }}
                 disabled={isLoading || bootstrapping}
-                className="mr-2 mb-2 p-2 text-[#8B5CF6] hover:text-white hover:bg-[#8B5CF6] rounded transition-all"
+                className="mr-2 mb-2 p-2 text-accent-primary hover:text-white hover:bg-accent-primary rounded transition-all"
               >
                 <Send className="h-4 w-4" />
               </button>

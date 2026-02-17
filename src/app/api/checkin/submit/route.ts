@@ -3,8 +3,10 @@ import dbConnect from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import { getDayKey } from '@/lib/progression';
 import { adjustUserXP } from '@/lib/user-progress';
+import { updateUserInsight } from '@/lib/insight-engine';
 
 import CheckIn from '@/lib/models/CheckIn';
+import UserEvent from '@/lib/models/UserEvent';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +56,18 @@ export async function POST(req: Request) {
 
     await checkIn.save();
 
+    // Track check-in event (non-blocking)
+    UserEvent.create({
+      userId: user.id,
+      type: 'log_added',
+      metadata: {
+        overallScore,
+        percentage,
+      },
+    }).catch((err) => console.error('Failed to create check-in event:', err));
 
+    // Update insights asynchronously
+    updateUserInsight(user.id).catch(console.error);
 
     const progression = await adjustUserXP(user.id, percentage);
 

@@ -1,17 +1,17 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { clamp } from "@/lib/math";
+import GeminiMark from "@/components/GeminiMark";
 import {
-  Compass,
-  FileText,
-  Lightbulb,
   LogOut,
-  MessageSquareText,
+  Network,
+  ScrollText,
+  Sparkles,
+  Swords,
   User,
-  Zap,
 } from "lucide-react";
 
 interface NavItem {
@@ -43,16 +43,16 @@ function SidebarNavItem({ href, label, icon, active }: NavItemProps) {
       className={[
         "group flex items-center gap-3 rounded-md px-3 py-2.5 text-[0.95rem] font-medium transition-all duration-200",
         active
-          ? "bg-[#8B5CF6]/10 text-white" 
-          : "text-[#9CA3AF] hover:bg-[#1C1F2B] hover:text-[#E5E7EB]",
+          ? "bg-accent-primary/10 text-white" 
+          : "text-text-secondary hover:bg-bg-card hover:text-text-primary",
       ].join(" ")}
     >
-      <span className={active ? "text-[#8B5CF6]" : "text-[#9CA3AF] group-hover:text-[#E5E7EB]"}>
+      <span className={active ? "text-accent-primary" : "text-text-secondary group-hover:text-text-primary"}>
         {icon}
       </span>
       <span>{label}</span>
       {active && (
-        <div className="ml-auto h-1.5 w-1.5 rounded-full bg-[#8B5CF6]" />
+        <div className="ml-auto h-1.5 w-1.5 rounded-full bg-accent-primary" />
       )}
     </Link>
   );
@@ -61,6 +61,13 @@ function SidebarNavItem({ href, label, icon, active }: NavItemProps) {
 function parseNumber(value: unknown, fallback: number): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function isNavItemActive(itemHref: string, pathname: string): boolean {
+  if (itemHref === "/dashboard/insight") {
+    return pathname === "/dashboard/insight" || pathname === "/dashboard/checkin";
+  }
+  return pathname === itemHref;
 }
 
 export default function Sidebar() {
@@ -134,24 +141,24 @@ export default function Sidebar() {
 
   const navItems: NavItem[] = [
     {
-      href: "/dashboard/checkin",
+      href: "/dashboard/insight",
       label: "Log",
-      icon: <FileText className="h-5 w-5" />,
+      icon: <ScrollText className="h-5 w-5" />,
     },
     {
       href: "/dashboard/quest",
-      label: "Quests",
-      icon: <Compass className="h-5 w-5" />,
+      label: "Quest",
+      icon: <Swords className="h-5 w-5" />,
     },
     {
-      href: "/dashboard/insight",
-      label: "Insight",
-      icon: <Lightbulb className="h-5 w-5" />,
+      href: "/dashboard/graph",
+      label: "Graph",
+      icon: <Network className="h-5 w-5" />,
     },
     {
       href: "/dashboard/chat",
       label: "Companion",
-      icon: <MessageSquareText className="h-5 w-5" />,
+      icon: <Sparkles className="h-5 w-5" />,
     },
     {
       href: "/dashboard/profile",
@@ -163,18 +170,18 @@ export default function Sidebar() {
   return (
     <aside
       className={[
-        "fixed z-[1000] flex h-screen flex-col",
-        "bg-[#0B0D14]",
-        "w-[var(--sidebar-width)]",
+        "fixed z-1000 flex h-screen flex-col",
+        "bg-bg-sidebar",
+        "w-(--sidebar-width)",
       ].join(" ")}
     >
       {/* Header */}
-      <div className="flex h-14 items-center px-4 border-b border-[#151823]">
+      <div className="flex h-14 items-center px-4 border-b border-bg-panel">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#8B5CF6] text-white shadow-sm">
-            <Zap className="h-4 w-4 fill-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-primary text-white shadow-sm">
+            <GeminiMark className="text-lg" />
           </div>
-          <span className="text-[0.95rem] font-bold text-[#E5E7EB]">Digital Twin</span>
+          <span className="text-[0.95rem] font-bold text-text-primary">Digital Twin</span>
         </div>
       </div>
 
@@ -186,29 +193,31 @@ export default function Sidebar() {
             href={item.href}
             label={item.label}
             icon={item.icon}
-            active={pathname === item.href}
+            active={isNavItemActive(item.href, pathname)}
           />
         ))}
       </nav>
 
       {/* User Widget */}
-      <div className="bg-[#080a0f] p-3 border-t border-[#151823]">
+      <div className="bg-[#080a0f] p-3 border-t border-bg-panel">
         <div className="flex items-center gap-3">
            <div className="relative">
-             <div className="h-9 w-9 bg-[#1C1F2B] rounded-full flex items-center justify-center text-[#9CA3AF] border border-[#2A2E3F]">
-                <User className="h-5 w-5" />
-             </div>
-             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-[#34D399] rounded-full border-2 border-[#0B0D14]" />
+              <div className="h-9 w-9 rounded-full bg-linear-to-br from-violet-500 to-fuchsia-500 p-px shadow-[0_0_10px_rgba(139,92,246,0.28)]">
+                 <div className="flex h-full w-full items-center justify-center rounded-full bg-[#1a1d29]">
+                   <User className="h-4.5 w-4.5 text-white" strokeWidth={2} />
+                 </div>
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-status-success rounded-full border-2 border-bg-sidebar" />
            </div>
            
            <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                  <p className="text-sm font-semibold text-white truncate">Unit Lvl {progress.level}</p>
-                 <span className="text-xs text-[#8B5CF6] font-medium">{progress.currentXP} XP</span>
+                 <span className="text-xs text-accent-primary font-medium">{progress.currentXP} XP</span>
               </div>
-              <div className="mt-1 h-1.5 w-full bg-[#1C1F2B] rounded-full overflow-hidden">
+              <div className="mt-1 h-1.5 w-full bg-bg-card rounded-full overflow-hidden">
                  <div
-                    className="h-full bg-[#8B5CF6] rounded-full"
+                    className="h-full bg-accent-primary rounded-full"
                     style={{ width: `${progressPercent}%` }}
                  />
               </div>
@@ -217,7 +226,7 @@ export default function Sidebar() {
 
         <button
           onClick={handleSignOut}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-[#1C1F2B] px-3 py-1.5 text-xs font-medium text-[#9CA3AF] hover:bg-[#2A2E3F] hover:text-white transition-colors"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-bg-card px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-border hover:text-white transition-colors"
           type="button"
         >
           <LogOut className="h-3 w-3" />

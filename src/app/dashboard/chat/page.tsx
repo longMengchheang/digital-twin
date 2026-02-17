@@ -29,7 +29,7 @@ export default function CompanionPage() {
   } = useChat();
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-5.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-[#2A2E3F] bg-[#151823] shadow-lg animate-fade-in relative">
+    <div className="mx-auto flex h-[calc(100vh-5.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-border bg-bg-panel shadow-lg animate-fade-in relative">
       <ChatHeader
         historyPanelRef={historyPanelRef}
         historyPanelOpen={historyPanelOpen}
@@ -42,7 +42,7 @@ export default function CompanionPage() {
       />
 
       {errorMessage && (
-        <div className="bg-[#F87171]/10 px-6 py-2 text-center text-xs font-medium text-[#F87171] border-b border-[#F87171]/20">
+        <div className="bg-status-error/10 px-6 py-2 text-center text-xs font-medium text-status-error border-b border-status-error/20">
           {errorMessage}
         </div>
       )}

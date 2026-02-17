@@ -13,6 +13,7 @@ function getJwtSecret(): string {
 
 export interface DecodedUser {
   id: string;
+  _id?: string;
   email?: string;
   [key: string]: unknown;
 }
@@ -38,7 +39,23 @@ export function verifyToken(req: Request): DecodedUser | null {
 
   try {
     const decoded = jwt.verify(token, getJwtSecret()) as AuthPayload;
-    return decoded.user;
+    const payloadUser = decoded.user || ({} as DecodedUser);
+    const normalizedId =
+      typeof payloadUser.id === 'string' && payloadUser.id.trim()
+        ? payloadUser.id.trim()
+        : typeof payloadUser._id === 'string' && payloadUser._id.trim()
+          ? payloadUser._id.trim()
+          : '';
+
+    if (!normalizedId) {
+      return null;
+    }
+
+    return {
+      ...payloadUser,
+      id: normalizedId,
+      _id: normalizedId,
+    };
   } catch {
     return null;
   }

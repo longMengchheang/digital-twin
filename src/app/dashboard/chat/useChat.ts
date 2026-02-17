@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ChatMessage, ChatSummary, ServerMessage } from "./types";
@@ -26,13 +26,13 @@ export function useChat() {
   const historyPanelRef = useRef<HTMLDivElement>(null);
   const shouldScrollToBottomRef = useRef(true);
 
-  const authHeaders = () => {
+  const authHeaders = useCallback(() => {
     const token = localStorage.getItem("token");
     if (!token) return null;
     return { Authorization: `Bearer ${token}` };
-  };
+  }, []);
 
-  const startNewSession = (clearInput = true) => {
+  const startNewSession = useCallback((clearInput = true) => {
     sessionStorage.removeItem(ACTIVE_CHAT_STORAGE_KEY);
     setActiveChatId(null);
     setMessages([introMessage]);
@@ -41,16 +41,16 @@ export function useChat() {
     }
     setErrorMessage("");
     setHistoryPanelOpen(false);
-  };
+  }, []);
 
-  const fetchHistoryChats = async (headers: Record<string, string>) => {
+  const fetchHistoryChats = useCallback(async (headers: Record<string, string>) => {
     const response = await axios.get("/api/chat/history", { headers });
     const rawChats = Array.isArray(response.data?.chats) ? (response.data.chats as ChatSummary[]) : [];
     setHistoryChats(rawChats);
     return rawChats;
-  };
+  }, []);
 
-  const loadConversationById = async (chatId: string, headers: Record<string, string>) => {
+  const loadConversationById = useCallback(async (chatId: string, headers: Record<string, string>) => {
     const response = await axios.get("/api/chat/history", {
       headers,
       params: { chatId },
@@ -70,9 +70,9 @@ export function useChat() {
     setActiveChatId(chatId);
     sessionStorage.setItem(ACTIVE_CHAT_STORAGE_KEY, chatId);
     shouldScrollToBottomRef.current = true;
-  };
+  }, []);
 
-  const loadMoreMessages = async () => {
+  const loadMoreMessages = useCallback(async () => {
     if (!nextCursor || loadingMore || !activeChatId) return;
 
     const headers = authHeaders();
@@ -104,9 +104,9 @@ export function useChat() {
     } finally {
       setLoadingMore(false);
     }
-  };
+  }, [activeChatId, authHeaders, loadingMore, nextCursor]);
 
-  const initializeChatPage = async () => {
+  const initializeChatPage = useCallback(async () => {
     const headers = authHeaders();
     if (!headers) {
       router.push("/");
@@ -137,9 +137,9 @@ export function useChat() {
     } finally {
       setBootstrapping(false);
     }
-  };
+  }, [authHeaders, fetchHistoryChats, loadConversationById, router, startNewSession]);
 
-  const openHistoryChat = async (chatId: string) => {
+  const openHistoryChat = useCallback(async (chatId: string) => {
     const headers = authHeaders();
     if (!headers) {
       router.push("/");
@@ -161,9 +161,9 @@ export function useChat() {
     } finally {
       setHistoryLoadingId(null);
     }
-  };
+  }, [authHeaders, loadConversationById, router]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
 
     const headers = authHeaders();
@@ -226,11 +226,11 @@ export function useChat() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [activeChatId, authHeaders, fetchHistoryChats, input, isLoading, router]);
 
   useEffect(() => {
     void initializeChatPage();
-  }, []);
+  }, [initializeChatPage]);
 
   useEffect(() => {
     if (shouldScrollToBottomRef.current) {

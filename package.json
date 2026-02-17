@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "clean:next": "node -e \"try{require('fs').rmSync('.next',{recursive:true,force:true});console.log('Removed .next cache')}catch(e){console.log('No .next cache to remove')}\"",
+    "dev:reset": "npm run clean:next && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -24,11 +26,11 @@
     "@tailwindcss/postcss": "^4.1.18",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.2.0",
-    "@types/react": "^19.2.13",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
     "autoprefixer": "^10.4.24",
-    "eslint": "^9.39.2",
-    "eslint-config-next": "^16.1.6",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.1.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"

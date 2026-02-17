@@ -16,6 +16,8 @@ export interface IUser extends Document {
   badges: string[];
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  lastQuestResetDate?: Date;
+  timezone: string;
 }
 
 const userSchema = new mongoose.Schema(
@@ -88,6 +90,14 @@ const userSchema = new mongoose.Schema(
     resetPasswordExpires: {
       type: Date,
       default: null,
+    },
+    lastQuestResetDate: {
+      type: Date,
+      default: null,
+    },
+    timezone: {
+      type: String,
+      default: 'Asia/Bangkok',
     },
   },
   {

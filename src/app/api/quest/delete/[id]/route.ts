@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import Quest from '@/lib/models/Quest';
+import QuestLog from '@/lib/models/QuestLog';
 import { unauthorized, serverError } from '@/lib/api-response';
 
 export const dynamic = 'force-dynamic';
@@ -27,11 +28,28 @@ export async function DELETE(req: Request, { params }: RouteContext) {
       return NextResponse.json({ msg: 'Invalid quest id.' }, { status: 400 });
     }
 
-    const quest = await Quest.findOneAndDelete({ _id: id, userId: user.id });
+    // Find the quest first before deleting
+    const quest = await Quest.findOne({ _id: id, userId: user.id });
 
     if (!quest) {
       return NextResponse.json({ msg: 'Quest not found.' }, { status: 404 });
     }
+
+    // If quest was completed, update existing QuestLog to mark as deleted
+    if (quest.completed) {
+      await QuestLog.findOneAndUpdate(
+        { userId: user.id, questId: quest._id },
+        {
+          $set: {
+            deletedDate: new Date(),
+            isDeleted: true,
+          },
+        }
+      );
+    }
+
+    // Now delete the quest
+    await Quest.findByIdAndDelete(id);
 
     return NextResponse.json({ msg: 'Quest deleted.' });
   } catch (error) {
