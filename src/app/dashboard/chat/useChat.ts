@@ -23,6 +23,7 @@ export function useChat() {
   const [loadingMore, setLoadingMore] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const historyPanelRef = useRef<HTMLDivElement>(null);
   const shouldScrollToBottomRef = useRef(true);
 
@@ -234,7 +235,10 @@ export function useChat() {
 
   useEffect(() => {
     if (shouldScrollToBottomRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+      }
     } else {
       shouldScrollToBottomRef.current = true;
     }
@@ -271,6 +275,7 @@ export function useChat() {
     hasMoreMessages,
     loadingMore,
     messagesEndRef,
+    scrollContainerRef,
     historyPanelRef,
     startNewSession,
     openHistoryChat,

@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Activity, ArrowRight, Network, ScrollText, Sparkles, Swords } from "lucide-react";
+import { Activity, ArrowRight } from "lucide-react";
 import { validatePassword } from "@/lib/validation";
 
 type FlashType = "success" | "error";
@@ -13,20 +13,6 @@ type AuthMode = "signin" | "signup";
 interface FlashState {
   type: FlashType;
   text: string;
-}
-
-function GeminiMark({ className = "text-base" }: { className?: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={[
-        "inline-flex items-center justify-center font-bold leading-none",
-        className,
-      ].join(" ")}
-    >
-      ?
-    </span>
-  );
 }
 
 function resolveMode(value: string | null): AuthMode {
@@ -161,147 +147,112 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 md:px-8 md:py-10 bg-bg-base">
-      <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-[1.2rem] border border-border bg-bg-card shadow-[0_0_50px_-10px_rgba(139,92,246,0.15)] md:grid-cols-[1.1fr_1fr]">
-        
-        {/* Left Panel: Branding / System Intro */}
-        <aside className="relative flex flex-col justify-between border-b border-border bg-linear-to-br from-[#14182E] to-bg-base p-8 md:border-b-0 md:border-r md:p-12">
-          {/* Decorative Elements */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.1),transparent_50%)]" />
-          
-          <div className="relative z-10">
-            <div className="mb-10 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]">
-                <GeminiMark className="text-xl" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white tracking-wide">Digital Mind</p>
-                <p className="text-[10px] uppercase tracking-wider text-text-secondary">System Version 2.0</p>
-              </div>
-            </div>
-
-            <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl leading-tight">
-              Initialize your <span className="text-accent-primary">digital twin</span>.
-            </h1>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-text-secondary">
-              Connect to your personal system. Track quests, monitor stability, and evolve your digital identity.
-            </p>
-          </div>
-
-          <div className="relative z-10 mt-12 space-y-3">
-            {[
-              { label: "Log", icon: <ScrollText className="h-4 w-4" /> },
-              { label: "Quest", icon: <Swords className="h-4 w-4" /> },
-              { label: "Graph", icon: <Network className="h-4 w-4" /> },
-              { label: "Companion", icon: <Sparkles className="h-4 w-4" /> },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="group flex items-center gap-3 rounded-lg border border-border bg-bg-panel/50 px-4 py-3 text-sm text-text-primary transition-all hover:bg-bg-card hover:border-accent-primary/50"
-              >
-                <span className="text-accent-primary transition-transform group-hover:scale-110">{item.icon}</span>
-                <span className="font-medium tracking-wide">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </aside>
-
-        {/* Right Panel: Auth Form */}
-        <section className="relative flex flex-col justify-center p-8 md:p-12 bg-bg-card">
-          <div className="mb-8 flex rounded-lg border border-border bg-bg-panel p-1 text-xs font-bold uppercase tracking-wide">
-            <button
-              type="button"
-              className={[
-                "w-1/2 rounded px-3 py-2 transition-all duration-200",
-                isLogin ? "bg-border text-white shadow-sm" : "text-text-muted hover:text-text-secondary",
-              ].join(" ")}
-              onClick={() => setAuthMode("signin")}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              className={[
-                "w-1/2 rounded px-3 py-2 transition-all duration-200",
-                !isLogin ? "bg-border text-white shadow-sm" : "text-text-muted hover:text-text-secondary",
-              ].join(" ")}
-              onClick={() => setAuthMode("signup")}
-            >
-              Sign Up
-            </button>
-          </div>
-
-          <h2 className="text-2xl font-bold tracking-tight text-white mb-2">{pageTitle}</h2>
-          <p className="text-sm text-text-secondary">Explore your thoughts.</p>
-          <p className="text-sm text-text-secondary mb-8">
-            {isLogin ? "Enter your credentials to access the system." : "Create a new biological profile."}
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 md:px-8 md:py-10 bg-bg-base relative overflow-hidden">
+      {/* Subtle Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      
+      <div className="w-full max-w-md p-8 md:p-10 relative z-10 rounded-2xl border border-border bg-bg-card shadow-2xl">
+        <div className="mb-8 text-center space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-white">{pageTitle}</h1>
+          <p className="text-sm text-text-secondary">
+            {isLogin ? "Welcome back. Enter your credentials." : "Create your digital twin profile."}
           </p>
+        </div>
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wide text-text-muted" htmlFor="email">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="user@system.com"
-                autoComplete="email"
-                className="input-discord w-full bg-bg-panel border-border focus:border-accent-primary transition-colors"
-                required
-              />
-            </div>
+        <div className="mb-8 flex rounded-xl border border-border bg-bg-panel p-1 text-sm font-semibold relative">
+          <button
+            type="button"
+            className={[
+              "w-1/2 rounded-lg py-2 transition-all duration-300 relative z-10",
+              isLogin ? "text-white" : "text-text-muted hover:text-text-secondary",
+            ].join(" ")}
+            onClick={() => setAuthMode("signin")}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            className={[
+              "w-1/2 rounded-lg py-2 transition-all duration-300 relative z-10",
+              !isLogin ? "text-white" : "text-text-muted hover:text-text-secondary",
+            ].join(" ")}
+            onClick={() => setAuthMode("signup")}
+          >
+            Sign Up
+          </button>
+          {/* Active Tab Background indicator */}
+          <div 
+            className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg bg-border shadow-sm transition-transform duration-300 ease-in-out"
+            style={{ 
+              transform: isLogin ? "translateX(0)" : "translateX(calc(100% + 8px))", 
+              left: "4px" 
+            }}
+          />
+        </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wide text-text-muted" htmlFor="password">
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted" htmlFor="email">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="user@system.com"
+              autoComplete="email"
+              className="w-full rounded-xl bg-bg-panel border border-border px-4 py-3 text-sm text-white placeholder-text-muted hover:border-accent-primary/50 focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-all outline-none"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold uppercase tracking-wider text-text-muted" htmlFor="password">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••"
-                autoComplete={isLogin ? "current-password" : "new-password"}
-                className="input-discord w-full bg-bg-panel border-border focus:border-accent-primary transition-colors"
-                required
-              />
-            </div>
-            
-            {isLogin && (
-              <div className="flex justify-end">
+              {isLogin && (
                 <a href="/auth/forgot-password" className="text-xs font-medium text-accent-primary hover:text-accent-hover transition-colors">
-                  Forgot password?
+                  Forgot?
                 </a>
-              </div>
-            )}
+              )}
+            </div>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="••••••••"
+              autoComplete={isLogin ? "current-password" : "new-password"}
+              className="w-full rounded-xl bg-bg-panel border border-border px-4 py-3 text-sm text-white placeholder-text-muted hover:border-accent-primary/50 focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-all outline-none"
+              required
+            />
+          </div>
 
+          {flash && (
+            <div
+              className={[
+                "rounded-xl border px-4 py-3 text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-1",
+                flash.type === "success"
+                  ? "border-green-500/20 bg-green-500/10 text-green-400"
+                  : "border-red-500/20 bg-red-500/10 text-red-400",
+              ].join(" ")}
+            >
+              {flash.type === "error" && <Activity className="h-4 w-4 shrink-0" />}
+              {flash.text}
+            </div>
+          )}
 
-            {flash && (
-              <div
-                className={[
-                  "rounded-lg border px-4 py-3 text-sm flex items-center gap-2",
-                  flash.type === "success"
-                    ? "border-green-500/20 bg-green-500/10 text-green-400"
-                    : "border-red-500/20 bg-red-500/10 text-red-400",
-                ].join(" ")}
-              >
-                {flash.type === "error" && <Activity className="h-4 w-4" />}
-                {flash.text}
-              </div>
-            )}
-
-            <button className="btn-discord-primary w-full group relative overflow-hidden" disabled={loading} type="submit">
-               <span className="relative z-10 flex items-center justify-center gap-2">
-                 {loading ? "Processing..." : isLogin ? "Access System" : "Initialize"}
-                 {!loading && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
-               </span>
-            </button>
-          </form>
-
-        </section>
+          <button 
+            className="w-full rounded-xl bg-accent-primary px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-primary/20 hover:bg-accent-hover hover:shadow-accent-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group" 
+            disabled={loading} 
+            type="submit"
+          >
+            {loading ? "Processing..." : isLogin ? "Access System" : "Initialize Account"}
+            {!loading && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
+          </button>
+        </form>
       </div>
     </div>
   );

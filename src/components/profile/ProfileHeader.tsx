@@ -26,50 +26,47 @@ export function ProfileHeader({
   const xpPercent = requiredXP > 0 ? Math.round((currentXP / requiredXP) * 100) : 0;
 
   return (
-    <section className="relative flex flex-col items-center rounded-3xl bg-linear-to-b from-violet-500/10 to-transparent py-8 px-6">
+    <section className="relative flex flex-col items-center overflow-hidden rounded-2xl border border-border bg-bg-card p-8 shadow-xl">
+      {/* Background Subtle Glow overlay */}
+      <div className="absolute top-0 w-full h-1/2 bg-linear-to-b from-accent-primary/10 to-transparent pointer-events-none" />
+
       {/* Avatar Ring with Glow Effect */}
-      <div className="relative">
+      <div className="relative z-10 w-full flex justify-center">
         <div
-          className="flex h-28 w-28 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-fuchsia-500 p-1 shadow-[0_0_30px_rgba(139,92,246,0.4)] animate-pulse"
-          style={{
-            animationDuration: "3s",
-          }}
+          className="flex h-28 w-28 items-center justify-center rounded-full bg-linear-to-br from-accent-primary to-fuchsia-500 p-[3px] shadow-[0_0_20px_rgba(139,92,246,0.3)]"
         >
-          <div className="flex h-full w-full items-center justify-center rounded-full bg-[#1a1d29]">
-            <User className="h-14 w-14 text-white" strokeWidth={1.8} />
+          <div className="flex h-full w-full items-center justify-center rounded-full bg-bg-base border-[3px] border-bg-card">
+            <User className="h-12 w-12 text-white" strokeWidth={1.8} />
           </div>
         </div>
 
         {/* Level Badge */}
-        <div className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 items-center justify-center whitespace-nowrap rounded-full bg-linear-to-r from-violet-600 to-violet-500 px-4 py-1 text-sm font-bold text-white shadow-lg">
-          <span>Level</span>
-          <span className="ml-1">{level}</span>
+        <div className="absolute -bottom-3 flex items-center justify-center whitespace-nowrap rounded-full border-[3px] border-bg-card bg-accent-primary px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
+          <span>Lvl {level}</span>
         </div>
       </div>
 
       {/* Username */}
-      <h1 className="mt-4 text-2xl font-bold tracking-tight text-white">{name}</h1>
+      <h1 className="mt-6 text-2xl font-bold tracking-tight text-white relative z-10">{name}</h1>
 
       {/* Subtitle / Avatar Stage */}
-      <p className="mt-1 text-sm font-medium text-gray-400">{avatarStage}</p>
+      <p className="mt-1 text-sm font-medium text-text-secondary relative z-10">{avatarStage}</p>
 
       {/* XP Progress Bar */}
-      <div className="mt-6 w-full max-w-sm px-4">
-        <div className="h-3 w-full overflow-hidden rounded-full bg-white/10">
+      <div className="mt-8 w-full max-w-sm px-4 relative z-10">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-bg-panel border border-border/50">
           <div
-            className="h-full rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.6)]"
+            className="h-full rounded-full bg-accent-primary shadow-[0_0_10px_rgba(139,92,246,0.5)] transition-all duration-500"
             style={{
               width: `${xpPercent}%`,
-              backgroundSize: "200% 100%",
-              animation: "xpShimmer 2s linear infinite",
             }}
           />
         </div>
 
         {/* XP Label */}
-        <div className="mt-2 flex justify-between text-xs font-semibold uppercase tracking-wider text-gray-500">
-          <span>Level {level}</span>
-          <span>
+        <div className="mt-2.5 flex justify-between text-[11px] font-bold uppercase tracking-wider text-text-muted">
+          <span>Level {level} Progress</span>
+          <span className="text-accent-primary">
             {currentXP} / {requiredXP} XP
           </span>
         </div>

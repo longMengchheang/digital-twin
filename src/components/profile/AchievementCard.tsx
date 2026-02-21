@@ -13,6 +13,7 @@ export interface AchievementCardProps {
     target: number;
   };
   unlockedAt?: string;
+  colorClass?: string;
 }
 
 /**
@@ -26,6 +27,7 @@ export function AchievementCard({
   isUnlocked,
   progress,
   unlockedAt,
+  colorClass,
 }: AchievementCardProps) {
   // Calculate progress percentage
   const progressPercent = progress
@@ -36,21 +38,21 @@ export function AchievementCard({
     <div
       className={`
         group relative flex items-start gap-4 rounded-2xl p-4
-        transition-all duration-300 hover:-translate-y-0.5
+        transition-all duration-300 hover:bg-bg-panel/40
         ${isUnlocked
-          ? "bg-linear-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20"
-          : "bg-white/5 border border-white/5 opacity-60 hover:opacity-80"
+          ? "border border-border/50 bg-bg-panel/20 hover:border-accent-primary/30"
+          : "border border-dashed border-border/30 bg-bg-panel/5 opacity-60 hover:opacity-80 hover:border-border/50"
         }
       `}
     >
       {/* Badge Icon */}
       <div
         className={`
-          flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-2xl
-          shadow-lg transition-transform duration-300 group-hover:scale-110
+          flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-2xl
+          transition-transform duration-300 group-hover:scale-110
           ${isUnlocked
-            ? "bg-linear-to-br from-amber-400 to-amber-500"
-            : "bg-gray-800 grayscale"
+            ? colorClass || "bg-accent-primary/10 text-accent-primary"
+            : "bg-bg-base text-text-muted grayscale"
           }
         `}
       >
@@ -64,23 +66,23 @@ export function AchievementCard({
       {/* Content */}
       <div className="flex flex-1 flex-col gap-1">
         {/* Title */}
-        <h3 className={`font-semibold ${isUnlocked ? "text-white" : "text-gray-400"}`}>
+        <h3 className={`font-semibold ${isUnlocked ? "text-text-primary" : "text-text-secondary"}`}>
           {title}
         </h3>
 
         {/* Description */}
-        <p className="text-sm text-gray-400">{description}</p>
+        <p className="text-sm text-text-secondary">{description}</p>
 
         {/* Progress Bar (when applicable) */}
         {progress && (
           <div className="mt-2">
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
+            <div className="flex justify-between text-xs text-text-muted mb-1">
               <span>Progress</span>
               <span>{progress.current} / {progress.target}</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+            <div className="h-1 w-full overflow-hidden rounded-full bg-bg-base/50">
               <div
-                className="h-full rounded-full bg-linear-to-r from-emerald-400 to-emerald-500 transition-all duration-500"
+                className="h-full rounded-full bg-accent-primary transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -89,7 +91,7 @@ export function AchievementCard({
 
         {/* Unlocked Date */}
         {isUnlocked && unlockedAt && (
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-text-muted">
             Unlocked {new Date(unlockedAt).toLocaleDateString()}
           </p>
         )}

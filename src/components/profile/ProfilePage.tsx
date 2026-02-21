@@ -12,14 +12,6 @@ export interface UserProfile {
   level: number;
   currentXP: number;
   requiredXP: number;
-  dailyStreak: number;
-  totalQuests: number;
-  completedQuests: number;
-  badges: string[];
-  currentMood: {
-    emoji: string;
-    label: string;
-  };
 }
 
 export interface ProfilePageProps {
@@ -28,7 +20,7 @@ export interface ProfilePageProps {
 
 /**
  * ProfilePage - Main container that combines all profile sections
- * Displays the complete profile with header, stats, and achievements
+ * Displays the complete profile with only the header as per minimalist layout
  */
 export function ProfilePage({ profile }: ProfilePageProps) {
   if (!profile) {
@@ -46,17 +38,15 @@ export function ProfilePage({ profile }: ProfilePageProps) {
         requiredXP={profile.requiredXP}
       />
 
-      {/* Statistics Section - 2x2 grid */}
-      <StatsSection
-        dailyStreak={profile.dailyStreak}
-        completedQuests={profile.completedQuests}
-        totalQuests={profile.totalQuests}
-        currentMood={profile.currentMood}
-        badgesCount={profile.badges.length}
-      />
+      <div className="grid gap-8 md:grid-cols-5 animate-fade-in" style={{ animationDelay: "150ms", animationFillMode: "both" }}>
+        <div className="md:col-span-2">
+          <StatsSection />
+        </div>
 
-      {/* Achievements Section - Vertical list */}
-      <AchievementsSection badges={profile.badges} />
+        <div className="md:col-span-3">
+          <AchievementsSection />
+        </div>
+      </div>
     </div>
   );
 }

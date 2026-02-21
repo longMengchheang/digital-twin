@@ -11,6 +11,7 @@ interface ChatMessageListProps {
   activeChatId: string | null;
   loadMoreMessages: () => Promise<void>;
   messagesEndRef: RefObject<HTMLDivElement>;
+  scrollContainerRef: RefObject<HTMLDivElement>;
 }
 
 export function ChatMessageList({
@@ -22,9 +23,10 @@ export function ChatMessageList({
   activeChatId,
   loadMoreMessages,
   messagesEndRef,
+  scrollContainerRef,
 }: ChatMessageListProps) {
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-6 scroll-smooth bg-bg-panel">
+    <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-6 scroll-smooth bg-bg-panel">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         {hasMoreMessages && !bootstrapping && (
           <button
@@ -41,15 +43,16 @@ export function ChatMessageList({
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-primary/30 border-t-accent-primary" />
           </div>
         ) : messages.length <= 1 && !activeChatId ? (
-          // Empty state greeting
-          <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
-            <div className="mb-4 rounded-full bg-bg-card p-4 text-accent-primary">
+          <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in relative z-10">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent-primary/5 rounded-full blur-[100px] pointer-events-none" />
+            
+            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-primary/10 text-accent-primary shadow-inner border border-accent-primary/20">
               <Sparkles className="h-8 w-8" />
             </div>
-            <h2 className="text-lg font-bold text-text-primary">
+            <h2 className="text-2xl font-bold tracking-tight text-white">
               Welcome to the Link.
             </h2>
-            <p className="mt-1 text-sm text-text-secondary max-w-xs">
+            <p className="mt-2 text-sm font-medium text-text-secondary max-w-sm">
               I am your digital twin. I&apos;m ready to sync.
             </p>
           </div>
@@ -63,8 +66,10 @@ export function ChatMessageList({
               ].join(" ")}
             >
               <div
-                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                  message.sender === "ai" ? "bg-accent-primary" : "bg-border"
+                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
+                  message.sender === "ai" 
+                    ? "bg-accent-primary border-accent-primary shadow-[0_0_10px_rgba(139,92,246,0.3)]" 
+                    : "bg-bg-card border-border/60 shadow-sm"
                 }`}
               >
                 {message.sender === "ai" ? (
@@ -100,7 +105,7 @@ export function ChatMessageList({
 
         {isLoading && (
           <div className="flex gap-4 animate-fade-in">
-            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-accent-primary">
+            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full border bg-accent-primary border-accent-primary shadow-[0_0_10px_rgba(139,92,246,0.3)]">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <div>

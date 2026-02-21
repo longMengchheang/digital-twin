@@ -1,36 +1,76 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import InsightCards, { InsightCardsHandle } from "@/components/InsightCards";
-import { RefreshCw, Sparkles } from "lucide-react";
+import { Flame, Sparkles } from "lucide-react";
 
 export default function InsightPage() {
   const insightCardsRef = useRef<InsightCardsHandle>(null);
+  const [streak, setStreak] = useState<number>(0);
 
-  const handleRefresh = async () => {
-    await insightCardsRef.current?.refresh();
-  };
+  // Auto-fetch profile data (including streak) and trigger Insight Cards refresh
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchDashboardData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        // Fetch Profile for Streak Data
+        const profileRes = await fetch("/api/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (profileRes.ok && mounted) {
+          const data = await profileRes.json();
+          if (data?.profile?.currentStreak !== undefined) {
+             setStreak(data.profile.currentStreak);
+          }
+        }
+
+        // Auto-trigger the Insight Cards refresh
+        await insightCardsRef.current?.refresh();
+      } catch (error) {
+        console.error("Failed to auto-refresh dashboard data", error);
+      }
+    };
+
+    // Initial fetch
+    void fetchDashboardData();
+
+    // Auto-refresh when window regains focus
+    const onFocus = () => void fetchDashboardData();
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("focus", onFocus);
+    };
+  }, []);
 
   return (
     <div className="mx-auto w-full max-w-5xl animate-fade-in space-y-6 pb-10 text-text-primary">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-primary/10 text-accent-primary">
-            <Sparkles className="h-5 w-5" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-primary/10 text-accent-primary border border-accent-primary/20 shadow-[0_0_15px_rgba(139,92,246,0.15)]">
+            <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Today&apos;s Twin Report</h1>
-            <p className="text-sm text-text-muted">A daily perspective from your digital twin</p>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Today&apos;s Twin Report</h1>
+            <p className="text-sm text-text-secondary mt-0.5">A daily perspective from your digital twin.</p>
           </div>
         </div>
-        <button
-          onClick={handleRefresh}
-          className="flex items-center gap-2 rounded-lg border border-border bg-bg-panel px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:border-accent-primary/30 hover:bg-bg-card hover:text-white"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </button>
+        <div className="group flex items-center gap-3 rounded-2xl border border-orange-500/20 bg-bg-panel px-4 py-2.5 transition-all shadow-[0_0_15px_rgba(249,115,22,0.05)] hover:border-orange-500/40 hover:bg-bg-panel/80 hover:shadow-[0_0_30px_rgba(249,115,22,0.15)] cursor-default">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/30 transition-all duration-300 group-hover:scale-110 group-hover:ring-orange-500/50 group-hover:bg-orange-500/20">
+            <Flame className="h-4 w-4 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
+          </div>
+          <div className="flex flex-col pr-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted leading-none mb-1">Day Streak</span>
+            <span className="text-sm font-bold text-orange-400 leading-none">{streak}</span>
+          </div>
+        </div>
       </div>
 
       {/* Insight Cards */}

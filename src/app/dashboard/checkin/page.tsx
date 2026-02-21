@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import confetti from "canvas-confetti";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, Frown, Meh, Smile, Zap, Flame } from "lucide-react";
 
 interface ResponseEntry {
   question: string;
@@ -19,41 +19,41 @@ interface CheckInResult {
 
 interface MoodOption {
   value: number;
-  emoji: string;
+  icon: React.ElementType;
   label: string;
-  color: string;
+  colorClass: string;
 }
 
 const moodOptions: MoodOption[] = [
   {
     value: 1,
-    emoji: "??",
+    icon: Frown,
     label: "Low",
-    color: "bg-status-error",
+    colorClass: "text-status-error",
   },
   {
     value: 2,
-    emoji: "??",
+    icon: Meh,
     label: "Neutral",
-    color: "bg-text-muted", // Muted gray
+    colorClass: "text-text-muted",
   },
   {
     value: 3,
-    emoji: "??",
+    icon: Smile,
     label: "Good",
-    color: "bg-status-success", // Teal
+    colorClass: "text-status-success",
   },
   {
     value: 4,
-    emoji: "??",
+    icon: Flame,
     label: "Great",
-    color: "bg-[#22D3EE]", // Cyan
+    colorClass: "text-[#22D3EE]",
   },
   {
     value: 5,
-    emoji: "??",
+    icon: Zap,
     label: "Excellent",
-    color: "bg-accent-primary", // Purple
+    colorClass: "text-accent-primary",
   },
 ];
 
@@ -206,7 +206,7 @@ export default function DailyPulsePage() {
         <h1 className="text-2xl font-bold mt-1">System Check</h1>
       </div>
 
-      <div className="card-discord w-full max-w-2xl p-8 bg-bg-card animate-fade-in">
+      <div className="w-full max-w-2xl p-8 rounded-xl border border-border/40 bg-bg-panel/20 shadow-sm backdrop-blur-sm animate-fade-in">
         {error && (
             <div className="mb-6 rounded border border-status-error/20 bg-status-error/10 px-4 py-3 text-sm text-status-error">
                 {error}
@@ -219,7 +219,7 @@ export default function DailyPulsePage() {
             <span>Query {currentQuestionIndex + 1} / {questions.length}</span>
             <span>{completionPercent}%</span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-bg-base">
+          <div className="h-1 w-full overflow-hidden rounded-full bg-bg-base/50">
             <div 
                 className="h-full rounded-full bg-accent-primary transition-all duration-300 ease-out"
                 style={{ width: `${completionPercent}%` }}
@@ -238,22 +238,23 @@ export default function DailyPulsePage() {
         <div className="mb-10 grid grid-cols-5 gap-3">
             {moodOptions.map((mood) => {
                 const isSelected = selectedRating === mood.value;
+                const Icon = mood.icon;
                 return (
                     <button
                         key={mood.value}
                         type="button"
                         onClick={() => setSelectedRating(mood.value)}
-                        className={`group relative flex flex-col items-center justify-center gap-2 rounded-lg p-3 transition-all duration-200 border ${
+                        className={`group relative flex flex-col items-center justify-center gap-2 rounded-lg p-4 transition-all duration-200 border ${
                             isSelected 
-                                ? `bg-border border-accent-primary shadow-[0_0_10px_rgba(139,92,246,0.2)]` 
-                                : "bg-bg-panel border-border hover:bg-border hover:border-text-secondary"
+                                ? `bg-accent-primary/10 border-accent-primary shadow-[0_0_15px_rgba(139,92,246,0.15)]` 
+                                : "bg-bg-panel/20 border-border/40 hover:bg-bg-panel/50 hover:border-text-secondary/50"
                         }`}
                     >
-                        <span className="text-3xl transition-transform duration-200 group-hover:scale-110">
-                            {mood.emoji}
+                        <span className={`transition-transform duration-200 group-hover:scale-110 ${isSelected ? mood.colorClass : "text-text-muted group-hover:text-text-secondary"}`}>
+                            <Icon className="h-8 w-8" strokeWidth={1.5} />
                         </span>
                         {isSelected && (
-                             <span className="text-[10px] font-bold uppercase tracking-wide text-text-primary">
+                             <span className={`text-[10px] font-bold uppercase tracking-wide ${mood.colorClass}`}>
                                 {mood.label}
                              </span>
                         )}
@@ -267,7 +268,7 @@ export default function DailyPulsePage() {
             type="button"
             onClick={() => void handleNext()}
             disabled={!selectedRating || submitting}
-            className="btn-discord-primary w-full py-3 text-sm font-bold shadow-lg"
+            className="rounded-lg bg-accent-primary/10 px-4 py-3 w-full text-sm font-semibold text-accent-primary transition-all hover:bg-accent-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
             {submitting ? (
                 <div className="flex items-center justify-center gap-2">

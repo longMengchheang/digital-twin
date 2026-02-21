@@ -54,9 +54,9 @@ export function StatCard({ icon, value, label, color, trend }: StatCardProps) {
     <div
       className={`
         group relative flex flex-col rounded-2xl p-4 
-        bg-white/5 border border-white/5 backdrop-blur-sm 
-        hover:bg-white/10 transition-all duration-300
-        hover:-translate-y-0.5 hover:shadow-lg
+        bg-bg-panel border border-border/50 backdrop-blur-sm 
+        hover:bg-bg-panel/80 hover:border-accent-primary/30 transition-all duration-300
+        hover:-translate-y-0.5 hover:shadow-xl
       `}
     >
       {/* Icon Wrapper */}

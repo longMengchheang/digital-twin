@@ -21,6 +21,7 @@ export default function CompanionPage() {
     hasMoreMessages,
     loadingMore,
     messagesEndRef,
+    scrollContainerRef,
     historyPanelRef,
     startNewSession,
     openHistoryChat,
@@ -29,7 +30,7 @@ export default function CompanionPage() {
   } = useChat();
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-5.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-border bg-bg-panel shadow-lg animate-fade-in relative">
+    <div className="mx-auto flex h-[calc(100vh-5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border bg-bg-panel shadow-2xl animate-fade-in relative z-10">
       <ChatHeader
         historyPanelRef={historyPanelRef}
         historyPanelOpen={historyPanelOpen}
@@ -56,6 +57,7 @@ export default function CompanionPage() {
         activeChatId={activeChatId}
         loadMoreMessages={loadMoreMessages}
         messagesEndRef={messagesEndRef}
+        scrollContainerRef={scrollContainerRef}
       />
 
       <ChatInput

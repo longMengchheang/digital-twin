@@ -41,18 +41,18 @@ function SidebarNavItem({ href, label, icon, active }: NavItemProps) {
     <Link
       href={href}
       className={[
-        "group flex items-center gap-3 rounded-md px-3 py-2.5 text-[0.95rem] font-medium transition-all duration-200",
+        "group flex items-center gap-3 rounded-xl px-4 py-3 text-[0.95rem] font-medium transition-all duration-300 relative",
         active
-          ? "bg-accent-primary/10 text-white" 
-          : "text-text-secondary hover:bg-bg-card hover:text-text-primary",
+          ? "bg-accent-primary/10 text-white shadow-sm ring-1 ring-accent-primary/20" 
+          : "text-text-secondary hover:bg-bg-panel hover:text-white",
       ].join(" ")}
     >
-      <span className={active ? "text-accent-primary" : "text-text-secondary group-hover:text-text-primary"}>
+      <span className={active ? "text-accent-primary" : "text-text-muted group-hover:text-text-secondary transition-colors"}>
         {icon}
       </span>
       <span>{label}</span>
       {active && (
-        <div className="ml-auto h-1.5 w-1.5 rounded-full bg-accent-primary" />
+        <div className="absolute right-3 h-1.5 w-1.5 rounded-full bg-accent-primary shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
       )}
     </Link>
   );
@@ -160,33 +160,28 @@ export default function Sidebar() {
       label: "Companion",
       icon: <Sparkles className="h-5 w-5" />,
     },
-    {
-      href: "/dashboard/profile",
-      label: "Profile",
-      icon: <User className="h-5 w-5" />,
-    },
   ];
 
   return (
     <aside
       className={[
-        "fixed z-1000 flex h-screen flex-col",
+        "fixed z-[1000] flex h-screen flex-col border-r border-border",
         "bg-bg-sidebar",
-        "w-(--sidebar-width)",
+        "w-[var(--sidebar-width)]",
       ].join(" ")}
     >
       {/* Header */}
-      <div className="flex h-14 items-center px-4 border-b border-bg-panel">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-primary text-white shadow-sm">
-            <GeminiMark className="text-lg" />
+      <div className="flex h-20 items-center px-6 border-b border-border/50">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-primary/10 text-accent-primary border border-accent-primary/20 shadow-[0_0_15px_rgba(139,92,246,0.15)]">
+            <GeminiMark className="text-xl" />
           </div>
-          <span className="text-[0.95rem] font-bold text-text-primary">Digital Twin</span>
+          <span className="text-base font-bold text-white tracking-wide">Digital Twin</span>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-0.5 px-2 py-4">
+      <nav className="flex-1 space-y-1.5 px-4 py-6">
         {navItems.map((item) => (
           <SidebarNavItem
             key={item.href}
@@ -199,37 +194,37 @@ export default function Sidebar() {
       </nav>
 
       {/* User Widget */}
-      <div className="bg-[#080a0f] p-3 border-t border-bg-panel">
-        <div className="flex items-center gap-3">
-           <div className="relative">
-              <div className="h-9 w-9 rounded-full bg-linear-to-br from-violet-500 to-fuchsia-500 p-px shadow-[0_0_10px_rgba(139,92,246,0.28)]">
-                 <div className="flex h-full w-full items-center justify-center rounded-full bg-[#1a1d29]">
-                   <User className="h-4.5 w-4.5 text-white" strokeWidth={2} />
-                 </div>
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-status-success rounded-full border-2 border-bg-sidebar" />
-           </div>
-           
-           <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                 <p className="text-sm font-semibold text-white truncate">Unit Lvl {progress.level}</p>
-                 <span className="text-xs text-accent-primary font-medium">{progress.currentXP} XP</span>
-              </div>
-              <div className="mt-1 h-1.5 w-full bg-bg-card rounded-full overflow-hidden">
-                 <div
-                    className="h-full bg-accent-primary rounded-full"
-                    style={{ width: `${progressPercent}%` }}
-                 />
-              </div>
-           </div>
-        </div>
+      <div className="p-4 border-t border-border/50 bg-bg-sidebar/80 backdrop-blur-md">
+         <Link href="/dashboard/profile" className="flex items-center gap-3 w-full group transition-all duration-300 hover:bg-bg-panel rounded-xl p-3 border border-transparent hover:border-border">
+            <div className="relative">
+               <div className="h-10 w-10 rounded-full bg-linear-to-br from-accent-primary to-fuchsia-500 p-[2px] shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-transform duration-300 group-hover:scale-105">
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-bg-card">
+                    <User className="h-5 w-5 text-white" strokeWidth={2} />
+                  </div>
+               </div>
+               <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-status-success rounded-full border-[2.5px] border-bg-sidebar" />
+            </div>
+            
+            <div className="flex-1 min-w-0">
+               <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-semibold text-white truncate group-hover:text-accent-primary transition-colors">Unit Lvl {progress.level}</p>
+                  <span className="text-xs text-accent-primary font-bold">{progress.currentXP} XP</span>
+               </div>
+               <div className="h-1.5 w-full bg-bg-base/50 rounded-full overflow-hidden border border-border/30">
+                  <div
+                     className="h-full bg-accent-primary rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+                     style={{ width: `${progressPercent}%` }}
+                  />
+               </div>
+            </div>
+         </Link>
 
         <button
           onClick={handleSignOut}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-bg-card px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-border hover:text-white transition-colors"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-bg-panel/50 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-text-muted hover:bg-bg-panel hover:text-white border border-transparent hover:border-border transition-all duration-300"
           type="button"
         >
-          <LogOut className="h-3 w-3" />
+          <LogOut className="h-4 w-4" />
           <span>Disconnect</span>
         </button>
       </div>

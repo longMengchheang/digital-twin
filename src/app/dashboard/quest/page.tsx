@@ -388,38 +388,41 @@ export default function QuestLogPage() {
 
       {/* Top Stats Section */}
       <section className="grid gap-4 sm:grid-cols-3">
-        <article className="card-discord p-4 bg-bg-card">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-accent-primary/10 p-2.5 text-accent-primary">
-              <Zap className="h-5 w-5" />
+        <article className="group overflow-hidden rounded-2xl border border-border bg-bg-card p-5 shadow-lg transition-all hover:border-accent-primary/30 hover:shadow-xl relative">
+          <div className="absolute -top-6 -right-6 w-24 h-24 bg-accent-primary/5 rounded-full blur-2xl pointer-events-none group-hover:bg-accent-primary/10 transition-colors" />
+          <div className="relative z-10 flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-primary/10 text-accent-primary shadow-inner">
+              <Zap className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-text-secondary">Active</p>
-              <p className="text-xl font-bold text-white">{activeQuests.length}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">Active</p>
+              <p className="text-2xl font-bold text-white">{activeQuests.length}</p>
             </div>
           </div>
         </article>
 
-        <article className="card-discord p-4 bg-bg-card">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-status-success/10 p-2.5 text-status-success">
-              <Check className="h-5 w-5" />
+        <article className="group overflow-hidden rounded-2xl border border-border bg-bg-card p-5 shadow-lg transition-all hover:border-status-success/30 hover:shadow-xl relative">
+          <div className="absolute -top-6 -right-6 w-24 h-24 bg-status-success/5 rounded-full blur-2xl pointer-events-none group-hover:bg-status-success/10 transition-colors" />
+          <div className="relative z-10 flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-status-success/10 text-status-success shadow-inner">
+              <Check className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-text-secondary">Completed</p>
-              <p className="text-xl font-bold text-white">{quests.filter(q => q.completed).length}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">Completed</p>
+              <p className="text-2xl font-bold text-white">{quests.filter(q => q.completed).length}</p>
             </div>
           </div>
         </article>
 
-        <article className="card-discord p-4 bg-bg-card">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-status-warning/10 p-2.5 text-status-warning">
-              <Trophy className="h-5 w-5" />
+        <article className="group overflow-hidden rounded-2xl border border-border bg-bg-card p-5 shadow-lg transition-all hover:border-status-warning/30 hover:shadow-xl relative">
+          <div className="absolute -top-6 -right-6 w-24 h-24 bg-status-warning/5 rounded-full blur-2xl pointer-events-none group-hover:bg-status-warning/10 transition-colors" />
+          <div className="relative z-10 flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-status-warning/10 text-status-warning shadow-inner">
+              <Trophy className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-text-secondary">XP Gained</p>
-              <p className="text-xl font-bold text-white">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">XP Gained</p>
+              <p className="text-2xl font-bold text-white max-w-[120px] truncate">
                 {totalXPGained}
               </p>
             </div>
@@ -435,8 +438,8 @@ export default function QuestLogPage() {
 
           <div className="space-y-4">
             {activeQuests.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center card-discord bg-bg-card">
-                <div className="mb-4 rounded-full bg-bg-base p-4 text-text-muted">
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/50 bg-bg-panel/10 py-12 text-center">
+                <div className="mb-4 rounded-full bg-bg-base/50 p-4 text-text-muted">
                   <Target className="h-8 w-8" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary">No active quests</h3>
@@ -450,7 +453,7 @@ export default function QuestLogPage() {
                 return (
                   <article
                     key={quest.id}
-                    className="group relative overflow-hidden rounded-xl border border-border bg-bg-card p-5 shadow-sm transition-all hover:border-accent-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.1)]"
+                    className="group relative overflow-hidden rounded-2xl border border-border bg-bg-panel p-6 shadow-sm transition-all hover:border-accent-primary/30 hover:shadow-lg hover:bg-bg-panel/80"
                   >
                     <div className="mb-4 flex items-start justify-between">
                       <div className="space-y-1">
@@ -468,37 +471,44 @@ export default function QuestLogPage() {
                         </div>
                         <h3 className="text-lg font-bold text-text-primary group-hover:text-white transition-colors">{quest.goal}</h3>
                       </div>
-                      <span className="text-xs font-medium text-text-muted">
-                        {new Date(quest.createdAt).toLocaleDateString()}
-                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteId(quest.id);
+                        }}
+                        className="rounded-lg p-1.5 text-text-muted transition-all hover:bg-red-500/10 hover:text-red-400 opacity-0 group-hover:opacity-100"
+                        title="Delete Quest"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
 
-                    <div className="mb-5 space-y-2">
-                      <div className="flex justify-between text-xs font-semibold text-text-secondary">
-                        <span>Progress</span>
-                        <span>{quest.progress}%</span>
+                    <div className="mb-6 space-y-2 relative z-10">
+                      <div className="flex justify-between text-xs font-bold text-text-secondary">
+                        <span className="uppercase tracking-wider">Progress</span>
+                        <span className="text-white">{quest.progress}%</span>
                       </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-bg-base">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-bg-base border border-border/50">
                         <div
-                          className={`h-full rounded-full bg-linear-to-r ${meta.progressClass} transition-all duration-300`}
+                          className={`h-full rounded-full bg-linear-to-r ${meta.progressClass} transition-all duration-500 shadow-inner`}
                           style={{ width: `${quest.progress}%` }}
                         />
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between gap-4 pt-2 border-t border-border">
+                    <div className="flex items-center justify-between gap-4 pt-3 border-t border-border/50 relative z-10">
                       <div className="flex gap-2 pt-2">
                         <button
                           type="button"
                           onClick={() => updateProgress(quest.id, quest.progress + 10)}
-                          className="rounded-md bg-border px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-accent-primary/20 hover:text-accent-hover"
+                          className="rounded-lg bg-border px-3.5 py-2 text-xs font-bold text-text-secondary transition-all hover:bg-accent-primary/20 hover:text-accent-primary shadow-sm"
                         >
                           +10%
                         </button>
                         <button
                           type="button"
                           onClick={() => updateProgress(quest.id, quest.progress + 25)}
-                          className="rounded-md bg-border px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-accent-primary/20 hover:text-accent-hover"
+                          className="rounded-lg bg-border px-3.5 py-2 text-xs font-bold text-text-secondary transition-all hover:bg-accent-primary/20 hover:text-accent-primary shadow-sm"
                         >
                           +25%
                         </button>
@@ -507,9 +517,9 @@ export default function QuestLogPage() {
                       <button
                         type="button"
                         onClick={() => toggleCompletion(quest.id)}
-                        className="btn-discord-primary px-4 py-1.5 text-xs mt-2"
+                        className="rounded-lg border border-accent-primary/30 bg-accent-primary/10 px-5 py-2 text-sm font-bold text-accent-primary transition-all hover:bg-accent-primary hover:text-white shadow-sm flex items-center shadow-[0_0_15px_rgba(139,92,246,0.15)] hover:shadow-[0_0_20px_rgba(139,92,246,0.4)]"
                       >
-                        <Check className="h-3.5 w-3.5 mr-1.5" />
+                        <Check className="h-4 w-4 mr-1.5" strokeWidth={2.5} />
                         Complete
                       </button>
                     </div>
@@ -574,16 +584,18 @@ export default function QuestLogPage() {
 
       <div className="space-y-8">
           {/* Create Quest Section */}
-          <section className="rounded-xl border border-border bg-bg-panel p-5 shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-text-secondary">
-              <Plus className="h-4 w-4" />
+          <section className="rounded-2xl border border-border bg-bg-card p-6 shadow-xl relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent-primary/5 rounded-full blur-2xl pointer-events-none" />
+            
+            <h2 className="mb-5 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-text-muted">
+              <Plus className="h-4 w-4 text-accent-primary" />
               New Directive
             </h2>
 
-            <form onSubmit={handleCreateQuest} className="space-y-4">
+            <form onSubmit={handleCreateQuest} className="space-y-5 relative z-10">
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label htmlFor="duration" className="mb-1.5 block text-xs font-semibold text-text-secondary">
+                  <label htmlFor="duration" className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-secondary">
                     Type
                   </label>
                   <div className="relative">
@@ -591,7 +603,7 @@ export default function QuestLogPage() {
                       id="duration"
                       value={duration}
                       onChange={(event) => setDuration(event.target.value)}
-                      className="input-discord appearance-none bg-bg-base"
+                      className="input-discord appearance-none bg-bg-base/50 focus:bg-bg-base transition-colors"
                     >
                       {Object.entries(durationMeta).map(([key, meta]) => (
                         <option key={key} value={key}>
@@ -606,7 +618,7 @@ export default function QuestLogPage() {
                 </div>
                 
                 <div className="w-1/3">
-                   <label htmlFor="recurrences" className="mb-1.5 block text-xs font-semibold text-text-secondary">
+                   <label htmlFor="recurrences" className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-secondary">
                     Repeats
                   </label>
                   <input
@@ -616,13 +628,13 @@ export default function QuestLogPage() {
                     value={recurrences}
                     onChange={(e) => setRecurrences(e.target.value)}
                     placeholder="8"
-                    className="input-discord placeholder:text-text-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="input-discord bg-bg-base/50 focus:bg-bg-base transition-colors placeholder:text-text-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="goal" className="mb-1.5 block text-xs font-semibold text-text-secondary">
+                <label htmlFor="goal" className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-secondary">
                   Objective
                 </label>
                 <input
@@ -632,50 +644,50 @@ export default function QuestLogPage() {
                   maxLength={60}
                   onChange={(event) => setGoal(event.target.value)}
                   placeholder="Define your goal..."
-                  className="input-discord placeholder:text-text-muted"
+                  className="input-discord bg-bg-base/50 focus:bg-bg-base transition-colors placeholder:text-text-muted"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={busy}
-                className="btn-discord-primary w-full justify-center text-sm"
+                className="rounded-xl border border-accent-primary/50 bg-accent-primary/20 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-accent-primary hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] w-full flex justify-center items-center backdrop-blur-sm mt-2"
               >
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Initialize Quest"}
+                {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : "Initialize Quest"}
               </button>
             </form>
           </section>
 
           {/* Completed Quests Section */}
-          <section className="card-discord p-5 bg-bg-card">
-            <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-text-secondary">
+          <section className="rounded-2xl border border-border bg-bg-card p-6 shadow-xl relative overflow-hidden">
+            <h2 className="mb-5 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-text-muted relative z-10">
               <Trophy className="h-4 w-4 text-status-warning" />
               Completed Logs
             </h2>
 
             {completedQuestsStacked.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center">
-                <p className="text-xs text-text-muted">No completed quests logged yet.</p>
+              <div className="rounded-xl border border-dashed border-border/50 bg-bg-panel/30 p-8 text-center relative z-10">
+                <p className="text-sm text-text-muted">No completed quests logged yet.</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3 relative z-10">
                 {completedQuestsStacked.slice(0, 5).map((group, index) => {
                   const meta = getDurationMeta(group.duration);
                   return (
                     <div
                       key={index}
-                      className="group flex items-center gap-3 rounded-lg bg-bg-base p-3 border border-border transition-colors hover:border-status-success/30"
+                      className="group flex items-center gap-4 rounded-xl bg-bg-panel/50 p-3.5 border border-border/50 transition-all hover:border-status-success/30 hover:bg-bg-panel"
                     >
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-status-success/10 text-status-success">
-                        <Check className="h-3 w-3" />
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-status-success/10 text-status-success shadow-inner">
+                        <Check className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-text-primary">
+                        <p className="truncate text-sm font-bold text-text-primary group-hover:text-white transition-colors">
                           <span className="capitalize">{group.goal}</span>
-                          {group.count > 1 && <span className="ml-2 text-xs text-text-muted">(x{group.count})</span>}
+                          {group.count > 1 && <span className="ml-2 text-xs font-semibold text-accent-primary">(x{group.count})</span>}
                         </p>
                       </div>
-                      <span className="text-xs font-bold text-status-success">+{group.totalReward}</span>
+                      <span className="text-sm font-black text-status-success">+{group.totalReward}</span>
                     </div>
                   );
                 })}

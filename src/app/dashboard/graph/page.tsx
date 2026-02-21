@@ -375,7 +375,7 @@ export default function MindMapPage() {
           >
             <div className="mx-auto mt-2 h-1 w-12 rounded-full bg-border lg:hidden" />
 
-            <div className="border-b border-bg-panel bg-linear-to-b from-[#11152A] to-transparent px-5 py-4">
+            <div className="border-b border-border/50 bg-linear-to-b from-bg-panel/80 to-transparent px-5 py-4">
               <button
                 onClick={() => setSelectedNodeId(null)}
                 className="rounded-md border border-border bg-bg-panel px-2 py-1 text-sm text-text-secondary transition-colors hover:border-accent-primary/50 hover:text-white"
@@ -406,16 +406,17 @@ export default function MindMapPage() {
             </div>
 
             <div className="flex flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden px-5 py-5">
-              <section className="rounded-xl border border-[#22263A] bg-[#12162A] p-4">
-                <p className="text-sm leading-relaxed text-[#C7CEDB]">{selectedNode.summary}</p>
-                <div className="mt-4">
-                  <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-[#7D87A4]">
+              <section className="rounded-xl border border-border/50 bg-bg-panel/50 p-4 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-accent-primary/5 rounded-full blur-2xl pointer-events-none" />
+                <p className="text-sm leading-relaxed text-text-primary relative z-10">{selectedNode.summary}</p>
+                <div className="mt-5 relative z-10">
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-text-secondary">
                     <span>Signal Strength</span>
-                    <span>{selectedNodeStrength}</span>
+                    <span className="text-white">{selectedNodeStrength}</span>
                   </div>
-                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#1E2437]">
+                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-bg-base border border-border/50">
                     <div
-                      className="h-full rounded-full transition-all duration-500"
+                      className="h-full rounded-full transition-all duration-500 shadow-inner"
                       style={{
                         width: `${selectedNodeStrength}%`,
                         background:
@@ -426,24 +427,26 @@ export default function MindMapPage() {
                 </div>
               </section>
 
-              <section className="space-y-3 rounded-xl border border-[#1E2538] bg-[#0F1324] p-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-[#7D87A4]">Recent Signals</h4>
-                <ul className="space-y-2 text-sm text-[#D1D5DB]">
+              <section className="space-y-3 rounded-xl border border-border/50 bg-bg-panel/30 p-4 shadow-sm">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted">Recent Signals</h4>
+                <ul className="space-y-2.5 text-sm text-text-secondary">
                   {selectedNode.details.slice(0, 4).map((detail, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#60A5FA]" />
-                      {detail}
+                    <li key={i} className="flex items-start gap-2.5">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-primary/70 shadow-[0_0_8px_rgba(139,92,246,0.5)]" />
+                      <span className="leading-snug">{detail}</span>
                     </li>
                   ))}
                 </ul>
               </section>
 
               {selectedNode.suggestion && (
-                <section className="rounded-xl border border-border bg-bg-panel p-4 text-sm text-text-primary">
-                  <span className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-accent-primary">
+                <section className="rounded-xl border border-border bg-bg-panel/80 p-5 shadow-sm">
+                  <span className="mb-2.5 block text-[10px] font-bold uppercase tracking-wider text-accent-primary">
                     Recommended Protocol
                   </span>
-                  {selectedNode.suggestion}
+                  <p className="text-sm leading-relaxed text-text-primary">
+                    {selectedNode.suggestion}
+                  </p>
                 </section>
               )}
             </div>
