@@ -1,9 +1,13 @@
 "use client";
 
-import React from "react";
 import { ProfileHeader } from "./ProfileHeader";
 import { StatsSection } from "./StatsSection";
 import { AchievementsSection } from "./AchievementsSection";
+
+export interface ProfileMood {
+  emoji: string;
+  label: string;
+}
 
 export interface UserProfile {
   id: string;
@@ -12,16 +16,17 @@ export interface UserProfile {
   level: number;
   currentXP: number;
   requiredXP: number;
+  dailyStreak: number;
+  totalQuests: number;
+  completedQuests: number;
+  badges: string[];
+  currentMood?: ProfileMood;
 }
 
 export interface ProfilePageProps {
   profile: UserProfile;
 }
 
-/**
- * ProfilePage - Main container that combines all profile sections
- * Displays the complete profile with only the header as per minimalist layout
- */
 export function ProfilePage({ profile }: ProfilePageProps) {
   if (!profile) {
     return null;
@@ -29,7 +34,6 @@ export function ProfilePage({ profile }: ProfilePageProps) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 pb-10">
-      {/* Profile Header - Avatar, Level, XP */}
       <ProfileHeader
         name={profile.name}
         avatarStage={profile.avatarStage}
@@ -38,13 +42,21 @@ export function ProfilePage({ profile }: ProfilePageProps) {
         requiredXP={profile.requiredXP}
       />
 
-      <div className="grid gap-8 md:grid-cols-5 animate-fade-in" style={{ animationDelay: "150ms", animationFillMode: "both" }}>
+      <div
+        className="grid gap-8 md:grid-cols-5 animate-fade-in"
+        style={{ animationDelay: "150ms", animationFillMode: "both" }}
+      >
         <div className="md:col-span-2">
-          <StatsSection />
+          <StatsSection
+            dailyStreak={profile.dailyStreak}
+            totalQuests={profile.totalQuests}
+            completedQuests={profile.completedQuests}
+            currentMood={profile.currentMood}
+          />
         </div>
 
         <div className="md:col-span-3">
-          <AchievementsSection />
+          <AchievementsSection badges={profile.badges} />
         </div>
       </div>
     </div>

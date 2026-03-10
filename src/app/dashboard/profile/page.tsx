@@ -16,8 +16,17 @@ interface LocalUserProfile {
   level: number;
   currentXP: number;
   requiredXP: number;
+  dailyStreak: number;
+  currentStreak?: number;
+  totalQuests: number;
+  completedQuests: number;
+  badges: string[];
   avatarStage: string;
   joinDate: string;
+  currentMood?: {
+    emoji: string;
+    label: string;
+  };
 }
 
 export default function CharacterPage() {
@@ -87,7 +96,6 @@ export default function CharacterPage() {
     );
   }
 
-  // Transform profile data for the new components
   const profileData: UserProfile = {
     id: profile.id,
     name: profile.name,
@@ -95,6 +103,11 @@ export default function CharacterPage() {
     level: profile.level,
     currentXP: profile.currentXP,
     requiredXP: profile.requiredXP,
+    dailyStreak: profile.dailyStreak ?? profile.currentStreak ?? 0,
+    totalQuests: profile.totalQuests,
+    completedQuests: profile.completedQuests,
+    badges: Array.isArray(profile.badges) ? profile.badges : [],
+    currentMood: profile.currentMood,
   };
 
   return (
@@ -103,7 +116,6 @@ export default function CharacterPage() {
         <div className="rounded-xl border border-status-warning/20 bg-status-warning/10 px-4 py-3 text-sm text-status-warning">{error}</div>
       )}
 
-      {/* Use new ProfilePage components */}
       <ProfilePage profile={profileData} />
     </div>
   );

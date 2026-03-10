@@ -55,7 +55,9 @@ const InsightCards = forwardRef<InsightCardsHandle, InsightCardsProps>(
       }
 
       try {
-        setLoading(true);
+        if (!insight) {
+          setLoading(true);
+        }
         setError(null);
         const response = await axios.get("/api/insight/state", { headers });
         
@@ -73,7 +75,7 @@ const InsightCards = forwardRef<InsightCardsHandle, InsightCardsProps>(
       } finally {
         setLoading(false);
       }
-    }, [authHeaders, router]);
+    }, [authHeaders, insight, router]);
 
     useImperativeHandle(ref, () => ({
       refresh: fetchInsight,

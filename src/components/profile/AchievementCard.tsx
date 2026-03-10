@@ -33,6 +33,7 @@ export function AchievementCard({
   const progressPercent = progress
     ? Math.round((progress.current / progress.target) * 100)
     : 0;
+  const compactIcon = typeof icon === "string" && icon.length > 2;
 
   return (
     <div
@@ -48,7 +49,7 @@ export function AchievementCard({
       {/* Badge Icon */}
       <div
         className={`
-          flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-2xl
+          flex h-12 w-12 shrink-0 items-center justify-center rounded-full
           transition-transform duration-300 group-hover:scale-110
           ${isUnlocked
             ? colorClass || "bg-accent-primary/10 text-accent-primary"
@@ -57,7 +58,9 @@ export function AchievementCard({
         `}
       >
         {typeof icon === "string" ? (
-          <span>{icon}</span>
+          <span className={compactIcon ? "text-[11px] font-bold tracking-wide" : "text-base font-bold"}>
+            {icon}
+          </span>
         ) : (
           icon
         )}

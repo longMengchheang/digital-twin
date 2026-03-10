@@ -1,77 +1,111 @@
-﻿# Digital Twin
+# Digital Twin
 
-A Next.js 14 app for personal growth tracking with JWT auth, quest progression, daily check-ins, insight analytics, and a Gemini-powered companion chat.
+Digital Twin is a Next.js 14 application for personal reflection and habit tracking. It combines JWT-based authentication, daily check-ins, quest progression, profile stats, event-driven insight generation, and a Gemini-powered companion chat in a single dashboard.
 
-## What Is Implemented
+## Current Product Scope
 
-- JWT auth with register/login, forgot password, and OTP reset flow.
-- Password reset emails are in simplified mode: OTP is logged to server console.
-- Quest system with:
-  - `daily`, `weekly`, `monthly`, `yearly` durations
-  - progress updates and completion toggles
-  - XP rewards and level progression
-  - optional recurrence count and automated daily reset handling
-- Daily check-in (5 fixed questions, one submission per day) with history.
-- Insight report API that derives:
-  - top interest
-  - productivity score
-  - entertainment ratio
-  - trend (`rising`, `stable`, `dropping`)
-  - daily summary and reflection
-- Behavior intelligence map (`/dashboard/graph`) generated from quests, check-ins, and chat signals.
-- Companion chat with Gemini model fallback logic and persisted conversation history.
-- Profile view/edit with streak, badges, level, XP, and mood snapshot.
+- Authentication with sign in, sign up, forgot password, and OTP-based reset flow
+- Daily check-in flow with one submission per day and historical review
+- Quest system with create, progress, complete, delete, and daily reset support
+- Insight dashboard with daily status, reflection, trend, focus, and entertainment ratio
+- Companion chat with persisted conversations and Gemini model fallback handling
+- Profile page with level, XP, streak, mood, quest stats, and earned badges
+- Event ingestion endpoint for updating insight state from app activity
 
-## Stack
+## Tech Stack
 
-- Next.js 14 (App Router)
-- React 18 + TypeScript
+- Next.js 14 App Router
+- React 18
+- TypeScript
 - Tailwind CSS
-- MongoDB + Mongoose
-- Gemini API (for chat and reflection generation)
+- MongoDB with Mongoose
+- Google Gemini API
 
 ## App Routes
 
-- `/` sign in/sign up
+- `/` authentication screen for sign in and sign up
 - `/auth/forgot-password`
 - `/auth/reset-password`
+- `/dashboard` redirects to `/dashboard/insight`
 - `/dashboard/insight`
 - `/dashboard/checkin`
 - `/dashboard/quest`
-- `/dashboard/graph`
 - `/dashboard/chat`
 - `/dashboard/profile`
 - `/dashboard/history`
 
-## API Surface (Current)
+## API Routes
 
-- Auth: `/api/auth/register`, `/api/auth/login`, `/api/auth/forgot-password`, `/api/auth/reset-password`
-- Profile: `/api/profile` (`GET`, `PUT`)
-- Check-in: `/api/checkin/questions`, `/api/checkin/submit`, `/api/checkin/history`
-- Quest: `/api/quest/create`, `/api/quest/all`, `/api/quest/log`, `/api/quest/reset`, `/api/quest/progress/[id]`, `/api/quest/complete/[id]`, `/api/quest/delete/[id]`
-- Insight: `/api/insight/state`, `/api/insight/map`, `/api/insight/rebuild`
-- Chat: `/api/chat/send`, `/api/chat/history`
-- Events: `/api/events`
+### Auth
 
-All protected routes use `Authorization: Bearer <token>`.
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/forgot-password`
+- `POST /api/auth/reset-password`
+
+### Profile
+
+- `GET /api/profile`
+
+### Check-in
+
+- `GET /api/checkin/questions`
+- `POST /api/checkin/submit`
+- `GET /api/checkin/history`
+
+### Quest
+
+- `GET /api/quest/all`
+- `POST /api/quest/create`
+- `GET /api/quest/log`
+- `POST /api/quest/reset`
+- `PUT /api/quest/progress/[id]`
+- `PUT /api/quest/complete/[id]`
+- `DELETE /api/quest/delete/[id]`
+
+### Insight
+
+- `GET /api/insight/state`
+
+### Chat
+
+- `POST /api/chat/send`
+- `GET /api/chat/history`
+
+### Events
+
+- `POST /api/events`
+
+Protected endpoints expect:
+
+```http
+Authorization: Bearer <token>
+```
 
 ## Environment Variables
 
-Create `.env` in the project root:
+Create a `.env` file in the project root.
 
 ```env
 JWT_SECRET=your_jwt_secret
 MONGODB_URI=mongodb://localhost:27017/digital-twin
 GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-2.5-flash
-# Optional:
-# GEMINI_FALLBACK_MODELS=gemini-2.0-flash,gemini-flash-latest
+```
+
+Optional:
+
+```env
+GEMINI_FALLBACK_MODELS=gemini-2.0-flash,gemini-flash-latest
 ```
 
 Notes:
-- `GEMINI_API_KEY` is required for companion chat (`/api/chat/send`).
-- Insight reflection can still return fallback text when Gemini is not configured.
-- User timezone defaults to `Asia/Bangkok` for quest daily reset logic unless updated in user data.
+
+- `JWT_SECRET` is required for auth.
+- `MONGODB_URI` is required for all app data.
+- `GEMINI_API_KEY` is required for companion chat.
+- Insight reflection falls back to static text when Gemini is unavailable.
+- `GEMINI_MODEL` is used first, then fallback models are tried in order.
 
 ## Getting Started
 
@@ -81,31 +115,47 @@ Notes:
 npm install
 ```
 
-2. Configure environment variables:
+2. Create your environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-3. Run the dev server:
+3. Start development:
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+4. Open [http://localhost:3000](http://localhost:3000)
 
 ## Scripts
 
-- `npm run dev` start development server
-- `npm run clean:next` clear `.next` cache
-- `npm run dev:reset` clear cache and restart dev server
-- `npm run build` create production build
-- `npm run start` run production server
-- `npm run lint` run ESLint
+- `npm run dev` starts the development server
+- `npm run clean:next` removes the `.next` cache
+- `npm run dev:reset` clears the cache and starts dev mode
+- `npm run build` creates a production build
+- `npm run start` runs the production server
+- `npm run lint` runs ESLint
+
+## Data Model Summary
+
+The application persists data for:
+
+- users
+- quests
+- quest logs
+- daily check-ins
+- user events
+- insight state
+- chat conversations
+- chat messages
+- extracted chat signals
 
 ## Operational Notes
 
-- Login and forgot-password endpoints are rate-limited (5 requests per minute per IP in-memory).
-- Password minimum length is 6.
-- No automated test suite is currently configured in `package.json`.
+- Login and forgot-password routes are rate-limited in memory.
+- Password reset uses an OTP flow.
+- The companion chat stores conversation history per user.
+- Insight state is refreshed from check-ins, events, and chat activity.
+- There is currently no automated test suite configured in `package.json`.

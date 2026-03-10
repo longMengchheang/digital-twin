@@ -8,39 +8,43 @@ export default function InsightPage() {
   const insightCardsRef = useRef<InsightCardsHandle>(null);
   const [streak, setStreak] = useState<number>(0);
 
-  // Auto-fetch profile data (including streak) and trigger Insight Cards refresh
   useEffect(() => {
     let mounted = true;
 
-    const fetchDashboardData = async () => {
+    const fetchStreak = async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
 
       try {
-        // Fetch Profile for Streak Data
         const profileRes = await fetch("/api/profile", {
           headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
         });
-        
+
         if (profileRes.ok && mounted) {
           const data = await profileRes.json();
-          if (data?.profile?.currentStreak !== undefined) {
-             setStreak(data.profile.currentStreak);
+          const nextStreak = data?.profile?.dailyStreak ?? data?.profile?.currentStreak;
+          if (nextStreak !== undefined) {
+            setStreak(Number(nextStreak) || 0);
           }
         }
-
-        // Auto-trigger the Insight Cards refresh
-        await insightCardsRef.current?.refresh();
       } catch (error) {
-        console.error("Failed to auto-refresh dashboard data", error);
+        console.error("Failed to refresh streak data", error);
       }
     };
 
-    // Initial fetch
-    void fetchDashboardData();
+    const refreshDashboardData = async () => {
+      try {
+        await fetchStreak();
+        await insightCardsRef.current?.refresh();
+      } catch (error) {
+        console.error("Failed to refresh dashboard data", error);
+      }
+    };
 
-    // Auto-refresh when window regains focus
-    const onFocus = () => void fetchDashboardData();
+    void fetchStreak();
+
+    const onFocus = () => void refreshDashboardData();
     window.addEventListener("focus", onFocus);
 
     return () => {

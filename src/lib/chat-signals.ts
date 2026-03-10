@@ -154,24 +154,3 @@ export function parseSignalResponseText(rawText: string): ExtractedChatSignal[] 
   return [];
 }
 
-export interface InsightSignalCounts {
-  stress: number;
-  focus: number;
-  motivation: number;
-  breathing: number;
-  reflection: number;
-  exercise: number;
-  fatigue: number;
-}
-
-export function createInsightSignalCounts(): InsightSignalCounts {
-  return {
-    stress: 0,
-    focus: 0,
-    motivation: 0,
-    breathing: 0,
-    reflection: 0,
-    exercise: 0,
-    fatigue: 0,
-  };
-}

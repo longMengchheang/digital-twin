@@ -16,30 +16,22 @@ export interface StatCardProps {
 }
 
 // Color mapping for different stat types
-const colorMap: Record<StatColor, { bg: string; iconBg: string; iconColor: string; ring: string }> = {
+const colorMap: Record<StatColor, { iconBg: string; iconColor: string }> = {
   amber: {
-    bg: "bg-amber-500/10",
     iconBg: "bg-amber-500/20",
     iconColor: "text-amber-400",
-    ring: "ring-amber-500/20",
   },
   emerald: {
-    bg: "bg-emerald-500/10",
     iconBg: "bg-emerald-500/20",
     iconColor: "text-emerald-400",
-    ring: "ring-emerald-500/20",
   },
   violet: {
-    bg: "bg-violet-500/10",
     iconBg: "bg-violet-500/20",
     iconColor: "text-violet-400",
-    ring: "ring-violet-500/20",
   },
   cyan: {
-    bg: "bg-cyan-500/10",
     iconBg: "bg-cyan-500/20",
     iconColor: "text-cyan-400",
-    ring: "ring-cyan-500/20",
   },
 };
 
@@ -49,6 +41,7 @@ const colorMap: Record<StatColor, { bg: string; iconBg: string; iconColor: strin
  */
 export function StatCard({ icon, value, label, color, trend }: StatCardProps) {
   const colors = colorMap[color];
+  const compactValue = typeof value === "string" && value.length > 10;
 
   return (
     <div
@@ -71,7 +64,9 @@ export function StatCard({ icon, value, label, color, trend }: StatCardProps) {
 
       {/* Value */}
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-white">{value}</span>
+        <span className={`${compactValue ? "text-lg" : "text-2xl"} font-bold text-white`}>
+          {value}
+        </span>
         
         {/* Trend indicator */}
         {trend && (
@@ -81,7 +76,7 @@ export function StatCard({ icon, value, label, color, trend }: StatCardProps) {
               ${trend.direction === "up" ? "text-emerald-400" : "text-red-400"}
             `}
           >
-            {trend.direction === "up" ? "\\u2191" : "\\u2193"} {trend.value}%
+            {trend.direction === "up" ? "+" : "-"} {trend.value}%
           </span>
         )}
       </div>

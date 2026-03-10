@@ -4,15 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { clamp } from "@/lib/math";
-import GeminiMark from "@/components/GeminiMark";
-import {
-  LogOut,
-  Network,
-  ScrollText,
-  Sparkles,
-  Swords,
-  User,
-} from "lucide-react";
+import { LogOut, ScrollText, Sparkles, Swords, User } from "lucide-react";
 
 interface NavItem {
   href: string;
@@ -43,11 +35,17 @@ function SidebarNavItem({ href, label, icon, active }: NavItemProps) {
       className={[
         "group flex items-center gap-3 rounded-xl px-4 py-3 text-[0.95rem] font-medium transition-all duration-300 relative",
         active
-          ? "bg-accent-primary/10 text-white shadow-sm ring-1 ring-accent-primary/20" 
+          ? "bg-accent-primary/10 text-white shadow-sm ring-1 ring-accent-primary/20"
           : "text-text-secondary hover:bg-bg-panel hover:text-white",
       ].join(" ")}
     >
-      <span className={active ? "text-accent-primary" : "text-text-muted group-hover:text-text-secondary transition-colors"}>
+      <span
+        className={
+          active
+            ? "text-accent-primary"
+            : "text-text-muted group-hover:text-text-secondary transition-colors"
+        }
+      >
         {icon}
       </span>
       <span>{label}</span>
@@ -65,7 +63,9 @@ function parseNumber(value: unknown, fallback: number): number {
 
 function isNavItemActive(itemHref: string, pathname: string): boolean {
   if (itemHref === "/dashboard/insight") {
-    return pathname === "/dashboard/insight" || pathname === "/dashboard/checkin";
+    return (
+      pathname === "/dashboard/insight" || pathname === "/dashboard/checkin"
+    );
   }
   return pathname === itemHref;
 }
@@ -105,9 +105,22 @@ export default function Sidebar() {
         }
 
         const nextProgress: ProgressState = {
-          level: Math.max(1, Math.floor(parseNumber(profile.level, DEFAULT_PROGRESS.level))),
-          currentXP: Math.max(0, Math.floor(parseNumber(profile.currentXP, DEFAULT_PROGRESS.currentXP))),
-          requiredXP: Math.max(100, Math.floor(parseNumber(profile.requiredXP, DEFAULT_PROGRESS.requiredXP))),
+          level: Math.max(
+            1,
+            Math.floor(parseNumber(profile.level, DEFAULT_PROGRESS.level)),
+          ),
+          currentXP: Math.max(
+            0,
+            Math.floor(
+              parseNumber(profile.currentXP, DEFAULT_PROGRESS.currentXP),
+            ),
+          ),
+          requiredXP: Math.max(
+            100,
+            Math.floor(
+              parseNumber(profile.requiredXP, DEFAULT_PROGRESS.requiredXP),
+            ),
+          ),
         };
 
         setProgress(nextProgress);
@@ -130,7 +143,11 @@ export default function Sidebar() {
 
   const progressPercent = useMemo(() => {
     if (!progress.requiredXP) return 0;
-    return clamp(Math.round((progress.currentXP / progress.requiredXP) * 100), 0, 100);
+    return clamp(
+      Math.round((progress.currentXP / progress.requiredXP) * 100),
+      0,
+      100,
+    );
   }, [progress.currentXP, progress.requiredXP]);
 
   const handleSignOut = () => {
@@ -151,11 +168,6 @@ export default function Sidebar() {
       icon: <Swords className="h-5 w-5" />,
     },
     {
-      href: "/dashboard/graph",
-      label: "Graph",
-      icon: <Network className="h-5 w-5" />,
-    },
-    {
       href: "/dashboard/chat",
       label: "Companion",
       icon: <Sparkles className="h-5 w-5" />,
@@ -171,12 +183,11 @@ export default function Sidebar() {
       ].join(" ")}
     >
       {/* Header */}
-      <div className="flex h-20 items-center px-6 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-primary/10 text-accent-primary border border-accent-primary/20 shadow-[0_0_15px_rgba(139,92,246,0.15)]">
-            <GeminiMark className="text-xl" />
-          </div>
-          <span className="text-base font-bold text-white tracking-wide">Digital Twin</span>
+      <div className="flex h-20 items-center justify-center px-6 border-b border-border/50">
+        <div className="flex items-center justify-center">
+          <span className="text-base font-bold text-white tracking-wide">
+            Digital Twin
+          </span>
         </div>
       </div>
 
@@ -195,29 +206,36 @@ export default function Sidebar() {
 
       {/* User Widget */}
       <div className="p-4 border-t border-border/50 bg-bg-sidebar/80 backdrop-blur-md">
-         <Link href="/dashboard/profile" className="flex items-center gap-3 w-full group transition-all duration-300 hover:bg-bg-panel rounded-xl p-3 border border-transparent hover:border-border">
-            <div className="relative">
-               <div className="h-10 w-10 rounded-full bg-linear-to-br from-accent-primary to-fuchsia-500 p-[2px] shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-transform duration-300 group-hover:scale-105">
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-bg-card">
-                    <User className="h-5 w-5 text-white" strokeWidth={2} />
-                  </div>
-               </div>
-               <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-status-success rounded-full border-[2.5px] border-bg-sidebar" />
+        <Link
+          href="/dashboard/profile"
+          className="flex items-center gap-3 w-full group transition-all duration-300 hover:bg-bg-panel rounded-xl p-3 border border-transparent hover:border-border"
+        >
+          <div className="relative">
+            <div className="h-10 w-10 rounded-full bg-linear-to-br from-accent-primary to-fuchsia-500 p-[2px] shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-transform duration-300 group-hover:scale-105">
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-bg-card">
+                <User className="h-5 w-5 text-white" strokeWidth={2} />
+              </div>
             </div>
-            
-            <div className="flex-1 min-w-0">
-               <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-semibold text-white truncate group-hover:text-accent-primary transition-colors">Unit Lvl {progress.level}</p>
-                  <span className="text-xs text-accent-primary font-bold">{progress.currentXP} XP</span>
-               </div>
-               <div className="h-1.5 w-full bg-bg-base/50 rounded-full overflow-hidden border border-border/30">
-                  <div
-                     className="h-full bg-accent-primary rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(139,92,246,0.5)]"
-                     style={{ width: `${progressPercent}%` }}
-                  />
-               </div>
+            <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-status-success rounded-full border-[2.5px] border-bg-sidebar" />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm font-semibold text-white truncate group-hover:text-accent-primary transition-colors">
+                Unit Lvl {progress.level}
+              </p>
+              <span className="text-xs text-accent-primary font-bold">
+                {progress.currentXP} XP
+              </span>
             </div>
-         </Link>
+            <div className="h-1.5 w-full bg-bg-base/50 rounded-full overflow-hidden border border-border/30">
+              <div
+                className="h-full bg-accent-primary rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+        </Link>
 
         <button
           onClick={handleSignOut}
